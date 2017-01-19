@@ -28,7 +28,9 @@ When creating [mustache][] templates in a WYSIWYG HTML editor (like [CKEditor][]
 look okay, but are invalid.
 
 > {{# foo }}
+> 
 > Hello world
+> 
 > {{/ foo }}
 
 becomes
@@ -111,13 +113,19 @@ We find nodes where the content starts with and end section tag or ends with a s
 tag is in the parent node. In that case we push the tag out of the node.
 
 ```html
-<p>{{# foo }}one, two, <strong>three{{/ foo }}</strong> items <strong><em>{{# bar }} and more</em></strong>{{/ bar}}</p>
+<p>
+  {{# foo }}one, two, <strong>three{{/ foo }}</strong> items <strong><em>
+  {{# bar }} and more</em></strong>{{/ bar}}
+</p>
 ```
 
 becomes
 
 ```html
-<p>{{# foo }}one, two, <strong>three</strong>{{/ foo }} items {{# bar }}<strong><em> and more</em></strong>{{/ bar}}</p>
+<p>
+  {{# foo }}one, two, <strong>three</strong>{{/ foo }} items
+  {{# bar }}<strong><em> and more</em></strong>{{/ bar}}
+</p>
 ```
 
 ### 3. Close and reopen section tags
@@ -150,16 +158,26 @@ becomes
 <p>{{# foo }}one two <strong>three</strong>{{/ foo }}<strong> four</strong> items</p>
 ```
 
-Another example:
+**Another example:**
 
 ```html
-<p>{{# foo }}one <em>two <strong>three{{/foo }} four {{^ foo }}zero</strong>{{/ foo}} items</em> here</p>
+<p>
+  {{# foo }}one <em>two <strong>three{{/foo }}
+  four
+  {{^ foo }}zero</strong>{{/ foo}}
+  items</em> here
+</p>
 ```
 
 becomes
 
 ```html
-<p>{{# foo }}one <em>two <strong>three</strong></em>{{/foo }}<em><strong>four</strong>{{^ foo }}<strong>zero</strong>{{/ foo}} items</em> here</p>
+<p>
+  {{# foo }}one <em>two <strong>three</strong></em>{{/foo }}
+  <em><strong>four</strong>
+  {{^ foo }}<strong>zero</strong>{{/ foo}}
+  items</em> here
+</p>
 ```
 
 ### 5. Prevent empty nodes
@@ -171,13 +189,25 @@ To prevent empty nodes caused by a section, we repeatly do two steps.
 If all the content of a node is in a single section, move the complete node into the section.
 
 ```html
-<p>{{# foo }}Hello {{# bar }}sweet{{/ bar}} <strong>{{# bar }}world{{/ bar }}</strong>{{/ foo}</p>
+<p>
+  {{# foo }}
+    Hello
+    {{# bar }}sweet{{/ bar}}
+    <strong>{{# bar }}world{{/ bar }}</strong>
+  {{/ foo}
+</p>
 ```
 
 becomes
 
 ```html
-{{# foo }}<p>Hello {{# bar }}sweet{{/ bar}} {{# bar }}<strong>world</strong>{{/ bar }}</p>{{/ foo}}
+{{# foo }}
+  <p>
+    Hello
+    {{# bar }}sweet{{/ bar}}
+    {{# bar }}<strong>world</strong>{{/ bar }}
+  </p>
+{{/ foo}}
 ```
 
 #### 5b. Merge sections
@@ -185,13 +215,24 @@ becomes
 If a section is repeated, merge the two sections.
 
 ```html
-{{# foo }}<p>Hello {{# bar }}sweet{{/ bar}} {{# bar }}<strong>world</strong>{{/ bar }}</p>{{/ foo}}
+{{# foo }}
+  <p>
+    Hello
+    {{# bar }}sweet{{/ bar}}
+    {{# bar }}<strong>world</strong>{{/ bar }}
+  </p>
+{{/ foo}}
 ```
 
 becomes
 
 ```html
-{{# foo }}<p>Hello {{# bar }}sweet <strong>world</strong>{{/ bar }}</p>{{/ foo}}
+{{# foo }}
+  <p>
+    Hello
+    {{# bar }}sweet <strong>world</strong>{{/ bar }}
+  </p>
+{{/ foo}}
 ```
 
 ### 6. Fix table rows
@@ -199,7 +240,7 @@ becomes
 For table rows the above steps might lead to the mustache engine removing a couples of cells in a row. To overcome
 this, we move the sections to be inside the cells instead.
 
-```
+```html
 <table>
   <tr><td>blue</td>{{# foo }}<td>green</td><td>red</td>{{/ foo }}</tr>
   {{ foo }}<tr><td>ocean</td><td>grass</td><td>flower</td></tr>{{/ foo }}
@@ -208,7 +249,7 @@ this, we move the sections to be inside the cells instead.
 
 becomes
 
-```
+```html
 <table>
   <tr><td>blue</td><td>{{# foo }}green{{/ foo }}</td><td>{{# foo }}red{{/ foo }}</td></tr>
   {{ foo }}<tr><td>ocean</td><td>grass</td><td>flower</td></tr>{{/ foo }}
