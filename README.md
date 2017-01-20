@@ -81,7 +81,7 @@ When cleaned up the template becomes
 
 ## How does it work?
 
-Mustache tidy cleans up a template in 6 steps:
+Mustache tidy cleans up a template in 5 steps:
 
 ### 1. Remove tags with only section tags
 
