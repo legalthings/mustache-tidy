@@ -54,7 +54,7 @@ When cleaned up the template becomes
 
 ---
 
-Look at another the example. Here there might be a `sub` variable with a title and intro.
+Look at another example. Here there might be a `sub` variable with a title and intro.
 
 > ### Title {{# sub }}- {{ title }}
 > {{ intro }}{{/sub}}
@@ -85,7 +85,7 @@ Mustache tidy cleans up a template in 6 steps:
 
 ### 1. Remove tags with only section tags
 
-All HTML nodes that only contains start and/or end section tags are with the inner content.
+All HTML nodes that only contains start and/or end section tags are replaced with these tags.
 
 ```html
 <p>{{# foo }}</p>
@@ -109,7 +109,7 @@ becomes
 
 ### 2. Push out unclosed section tags
 
-We find nodes where the content starts with and end section tag or ends with a start section tag and the corresponding
+We find nodes where the content starts with an end section tag, or ends with a start section tag, and the corresponding
 tag is in the parent node. In that case we push the tag out of the node.
 
 ```html
@@ -130,32 +130,18 @@ becomes
 
 ### 3. Close and reopen section tags
 
-We identify tags that are opened but not closed within the node. They're closed at the end of the node and opened
-in the next node.
+We identify tags that are opened but not closed within the node content. Then we split section into several sections, so that each of them was wholy contained inside node.
 
 ```html
 <p>Hello {{# foo }}world<p>
 <p>How are you?{{/ foo}} I'm doing well.</p>
 ```
 
-```html
-<p>Hello {{# foo }}world{{/ foo}}<p>
-<p>{{# foo }}How are you?{{/ foo}} I'm doing well.</p>
-```
-
-### 4. Split nodes
-
-Next we look for sections that are opened or closed in a parent node. In that case we close the node before the section
-tag and open it right after. Now one child node is outside of the mustache section and one is inside it.
-
-```html
-<p>{{# foo }}one two <strong>three{{/ foo }} four</strong> items</p>
-```
-
 becomes
 
 ```html
-<p>{{# foo }}one two <strong>three</strong>{{/ foo }}<strong> four</strong> items</p>
+<p>Hello {{# foo }}world{{/ foo}}<p>
+<p>{{# foo }}How are you?{{/ foo}} I'm doing well.</p>
 ```
 
 **Another example:**
@@ -173,18 +159,18 @@ becomes
 
 ```html
 <p>
-  {{# foo }}one <em>two <strong>three</strong></em>{{/foo }}
-  <em><strong>four</strong>
-  {{^ foo }}<strong>zero</strong>{{/ foo}}
+  {{# foo }}one {{/foo }}<em>{{# foo }}two {{/foo }}<strong>{{# foo }}three{{/foo }}
+  four
+  {{^ foo }}zero{{/ foo}}</strong>
   items</em> here
 </p>
 ```
 
-### 5. Prevent empty nodes
+### 4. Prevent empty nodes
 
 To prevent empty nodes caused by a section, we repeatly do two steps.
 
-#### 5a. Move nodes inside a section
+#### 4a. Move nodes inside a section
 
 If all the content of a node is in a single section, move the complete node into the section.
 
@@ -210,7 +196,7 @@ becomes
 {{/ foo}}
 ```
 
-#### 5b. Merge sections
+#### 4b. Merge sections
 
 If a section is repeated, merge the two sections.
 
@@ -235,7 +221,7 @@ becomes
 {{/ foo}}
 ```
 
-### 6. Fix table rows
+### 5. Fix table rows
 
 For table rows the above steps might lead to the mustache engine removing a couples of cells in a row. To overcome
 this, we move the sections to be inside the cells instead.
