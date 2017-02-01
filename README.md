@@ -130,7 +130,8 @@ becomes
 
 ### 3. Close and reopen section tags
 
-We identify tags that are opened but not closed within the node content. Then we split section into several sections, so that each of them was wholy contained inside node.
+We identify tags that are opened but not closed within the node content. Then we split section into several sections, so
+that each of them is fully contained inside a node.
 
 ```html
 <p>Hello {{# foo }}world<p>
