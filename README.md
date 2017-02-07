@@ -82,6 +82,8 @@ When cleaned up the template becomes
 {{# sub }}<p>{{ intro }}</p>{{/sub}}
 ```
 
+So the goal of library is to fix tags sections, so that opening and closing tags of section were in the same node.
+
 ## How does it work?
 
 Tidy process concernes only with tags sections, not with single tags.
