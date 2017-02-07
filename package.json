@@ -1,0 +1,11 @@
+{
+    "name": "mustache-tidy",
+    "private": true,
+    "repository": {
+      "type": "git",
+      "url": "git@github.com:legalthings/mustache-tidy.git"
+    },
+    "dependencies": {
+      "jsdom": "^9.9.1"
+    }
+}
