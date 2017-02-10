@@ -1,6 +1,7 @@
 var tidy = require('../');
 
 describe('Replacing empty dom nodes with containing tags', function() {
+
     it('should recursively replace nodes for opening tag', function() {
         var input = `
             <div>
@@ -91,6 +92,30 @@ describe('Replacing empty dom nodes with containing tags', function() {
 
         var result = tidy(input);
         expect(result).toBe('{{#tag}} {{/tag}}');
+    });
+
+    it('should replace tag nodes, if tags data is in separate node', function() {
+        var input = `
+            <p>{{#tag}}</p>
+            <p>Data</p>
+            <p>{{/tag}}</p>
+        `;
+
+        var result = tidy(input);
+        expect(result).toBe('{{#tag}}<p>Data</p>{{/tag}}');
+    });
+
+    it('should correctly handle nested nodes', function() {
+        var input = `
+            <p>{{# foo }}</p>
+            <p>Data</p>
+            <p>{{# bar }} {{/ bar }}</p>
+            <p>Data</p>
+            <p>{{/ foo }}</p>
+        `;
+
+        var result = tidy(input);
+        expect(result).toBe('{{# foo }}<p>Data</p>{{# bar }} {{/ bar }}<p>Data</p>{{/ foo }}');
     });
 
     it('should not replace single opening tag', function() {

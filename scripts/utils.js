@@ -6,7 +6,7 @@ jsdom.defaultDocumentFeatures = {
     ProcessExternalResources: false
 };
 
-var Node = require('../node_modules/jsdom/lib/jsdom/living/generated/Node.js');
+var Node = require('jsdom/lib/jsdom/living/generated/Node.js');
 
 module.exports = {
     jsdom: jsdom.jsdom,

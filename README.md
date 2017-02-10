@@ -129,7 +129,7 @@ HTML nodes that only contains start and/or end section tags are replaced with th
 ```html
 <p>{{# foo }}</p>
 <p>Hello world</p>
-<p>{{/ foo }} {{^ foo }}</p>
+<p>{{# bar }} {{/ bar }}</p>
 <p>Hi moon</p>
 <p>{{/ foo }}</p>
 <p>{{# bar }}Great sun{{/ bar }}</p>
@@ -140,7 +140,7 @@ becomes
 ```html
 {{# foo }}
 <p>Hello world</p>
-{{/ foo }} {{^ foo }}
+{{# bar }} {{/ bar }}
 <p>Hi moon</p>
 {{/ foo }}
 <p>{{# bar }}Great sun{{/ bar }}</p>
