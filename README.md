@@ -10,7 +10,7 @@ JavaScript library to clean up Mustache templates.
 
 ### Node.js
 
-    var mustacheTidy = require('mustache-tidy').mustacheTidy;
+    var mustacheTidy = require('mustache-tidy');
 
     var cleanTemplate = mustacheTidy(dirtyTemplate);
 
@@ -25,6 +25,16 @@ JavaScript library to clean up Mustache templates.
     </script>
 
 `dirtyTemplate` should be either a string with template html, or a root DOM Node object of template. If it is a string, result will be returned. If it is a Node object, it will be changed in place.
+
+### Options
+
+Second argument is also available.
+
+```
+var cleanTemplate = mustacheTidy(dirtyTemplate, options);
+```
+
+Options is an object with key/name pairs. Currently the only option available is `debug`, that should take boolean values. If set to `true`, it enables debug console output while executing tidy process.
 
 ## Why does this library exists?
 
@@ -119,7 +129,7 @@ HTML nodes that only contains start and/or end section tags are replaced with th
 ```html
 <p>{{# foo }}</p>
 <p>Hello world</p>
-<p>{{/ foo }} {{^ foo }}</p>
+<p>{{# bar }} {{/ bar }}</p>
 <p>Hi moon</p>
 <p>{{/ foo }}</p>
 <p>{{# bar }}Great sun{{/ bar }}</p>
@@ -130,7 +140,7 @@ becomes
 ```html
 {{# foo }}
 <p>Hello world</p>
-{{/ foo }} {{^ foo }}
+{{# bar }} {{/ bar }}
 <p>Hi moon</p>
 {{/ foo }}
 <p>{{# bar }}Great sun{{/ bar }}</p>
