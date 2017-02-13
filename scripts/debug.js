@@ -1,8 +1,7 @@
 
 // Set dependencies
-var utils = require('./utils');
-var Node = utils.Node;
-var repeatString = utils.repeatString;
+var domConfig = require('./dom-config');
+var Node = domConfig.Node;
 
 module.exports = {
     init: init,
@@ -22,9 +21,10 @@ function init(config) {
 function log() {
     if (!options.debug) return;
 
+    // Debug for text dom nodes
     var args = Array.prototype.slice.apply(arguments);
     for (var i = 0; i < args.length; i++) {
-        if (typeof args[i] !== 'object' || typeof args[i].nodeType === 'undefined') continue;
+        if (args[i] === null || typeof args[i] !== 'object' || typeof args[i].nodeType === 'undefined') continue;
         if (args[i].nodeType === Node.TEXT_NODE) {
             args[i] = '"' + args[i].nodeValue + '"';
         }
@@ -62,4 +62,9 @@ function logResult(root) {
     function levelIndent(level) {
         return level ? repeatString(' ', level * 4) : '';
     }
+}
+
+// Repeat some string 'count' times
+function repeatString(string, count) {
+    return Array(count*1 + 1).join(string);
 }

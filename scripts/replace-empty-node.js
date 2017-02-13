@@ -1,8 +1,8 @@
 
 // Set dependencies
-var utils = require('./utils');
-var Node = utils.Node;
+var domConfig = require('./dom-config');
 var debug = require('./debug');
+var Node = domConfig.Node;
 var log = debug.log;
 
 // Static variable

@@ -163,7 +163,7 @@ describe('Replacing empty dom nodes with containing tags', function() {
     it('should not replace opening tag node with data', function() {
         var input = `
             <div>
-                Data{{#tag}}
+                {{#tag}}Data
             </div>
             <div>
                 {{/tag}}
@@ -171,7 +171,7 @@ describe('Replacing empty dom nodes with containing tags', function() {
         `;
 
         var result = tidy(input);
-        expect(result).toBe('<div>Data{{#tag}}</div>{{/tag}}');
+        expect(result).toBe('{{#tag}}<div>Data</div>{{/tag}}');
     });
 
     it('should not replace closing tag node with data', function() {
@@ -185,7 +185,7 @@ describe('Replacing empty dom nodes with containing tags', function() {
         `;
 
         var result = tidy(input);
-        expect(result).toBe('{{#tag}}<div>Data{{/tag}}</div>');
+        expect(result).toBe('{{#tag}}<div>Data</div>{{/tag}}');
     });
 
     it('should not replace root node with data', function() {
@@ -309,6 +309,6 @@ describe('Replacing empty dom nodes with containing tags', function() {
         `;
 
         var result = tidy(input);
-        expect(result).toBe('<a href="#">{{#tag}}</a>{{/tag}}');
+        expect(result).toBe('{{#tag}}<a href="#"></a>{{/tag}}');
     });
 });
