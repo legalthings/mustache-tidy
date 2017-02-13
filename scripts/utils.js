@@ -11,6 +11,7 @@ var Node = domConfig.Node;
 module.exports = {
     init: init,
     repeatString: repeatString,
+    updateTextNodeData: updateTextNodeData,
     createTextNode: createTextNode,
     startsWithTag: startsWithTag,
     endsWithTag: endsWithTag,
@@ -27,6 +28,14 @@ function init(config) {
 // Repeat some string 'count' times
 function repeatString(string, count) {
     return Array(count*1 + 1).join(string);
+}
+
+// Create text node with data based on existing tag node
+function updateTextNodeData(data, level) {
+    data.index = 0;
+    data.node = createTextNode(data.tag);
+
+    if (typeof level !== 'undefined') data.level = level;
 }
 
 // Create text node

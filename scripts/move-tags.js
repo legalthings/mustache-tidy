@@ -6,7 +6,7 @@ var debug = require('./debug');
 
 // Module variables
 var nodesWithPlaceholders = [];
-var createTextNode = utils.createTextNode;
+var updateTextNodeData = utils.updateTextNodeData;
 var startsWithTag = utils.startsWithTag;
 var endsWithTag = utils.endsWithTag;
 var isDataElement = utils.isDataElement;
@@ -183,10 +183,4 @@ function replaceMovedTag(data) {
 
     data.node.nodeValue = text.substring(0, data.index) + placeholder + text.substring(data.index + size);
     nodesWithPlaceholders.push({node: data.node, placeholder: placeholder});
-}
-
-// Create text node with data based on existing tag node
-function updateTextNodeData(data) {
-    data.index = 0;
-    data.node = createTextNode(data.tag);
 }
