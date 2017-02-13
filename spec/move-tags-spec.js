@@ -1,4 +1,3 @@
-// var tidy = require('../mustache-tidy.js').mustacheTidy;
 var tidy = require('../');
 
 describe('Moving tags', function() {
@@ -179,6 +178,41 @@ describe('Moving tags', function() {
                 '{{#tag}}' +
                 'Data' +
                 '{{/tag}}' +
+                '<div>' +
+                    '<div>' +
+                        '<p>Data</p>' +
+                    '</div>' +
+                '</div>' +
+            '</div>'
+        );
+    });
+});
+
+describe('Moving tags', function() {
+    it('should move both tags up to common ancestor node, inside tag section, and then remove tags as empty', function() {
+        var input = `
+            <div>
+                <div>
+                    <div>
+                        <p>Data{{#tag}}</p>
+                    </div>
+                </div>
+                <div>
+                    <div>
+                        <p>{{/tag}}Data</p>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        var result = tidy(input);
+        expect(result).toBe(
+            '<div>' +
+                '<div>' +
+                    '<div>' +
+                        '<p>Data</p>' +
+                    '</div>' +
+                '</div>' +
                 '<div>' +
                     '<div>' +
                         '<p>Data</p>' +
