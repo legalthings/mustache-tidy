@@ -5,7 +5,6 @@ var utils = require('./utils');
 var debug = require('./debug');
 
 // Module variables
-var nodesWithPlaceholders = [];
 var updateTextNodeData = utils.updateTextNodeData;
 var startsWithTag = utils.startsWithTag;
 var endsWithTag = utils.endsWithTag;
@@ -14,6 +13,8 @@ var isFullDataElement = utils.isFullDataElement;
 var repeatString = utils.repeatString;
 var Node = domConfig.Node;
 var log = debug.log;
+var nodesWithPlaceholders = [];
+var fixTableTags = null;
 
 module.exports = {
     init: init,
@@ -29,9 +30,11 @@ function init(config) {
     utils.init(config);
 
     nodesWithPlaceholders = [];
+    fixTableTags = config.fixTableTags;
 }
 
 // Move tags in case when closing tag is in ancestor node of opening
+// If tags are moved inside table outside table cells, mark tags as temporary
 function handleCaseClosedIsAncestor(opened, closed) {
     log('closing tag is in ancestor node of opening tag');
 
@@ -49,9 +52,12 @@ function handleCaseClosedIsAncestor(opened, closed) {
         log('--------------- move closed tag down inside');
         moveTagDownBackword(closed, opened.level, opened.node);
     }
+
+    fixTableTags.saveTmpTags(opened, closed);
 }
 
 // Move tags in case when opening tag is in ancestor node of closing
+// If tags are moved inside table outside table cells, mark tags as temporary
 function handleCaseOpenedIsAncestor(opened, closed) {
     log('closed tag is contained inside open');
 
@@ -69,11 +75,14 @@ function handleCaseOpenedIsAncestor(opened, closed) {
         log('--------------- move opened tag down inside');
         moveTagDownForward(opened, closed.level, closed.node);
     }
+
+    fixTableTags.saveTmpTags(opened, closed);
 }
 
 // Move tags in case when they are not in ancestor nodes of each other
 // In here we first try to move tags to level of each other, and than - to common parent node
 // For this we pass additional parameter to 'moveTagUp...' functions
+// If tags are moved inside table outside table cells, mark tags as temporary
 function handleCaseSeparateTrees(opened, closed) {
     log('opening and closing tags are not in ancestor nodes of each other');
 
@@ -94,6 +103,8 @@ function handleCaseSeparateTrees(opened, closed) {
         log('--------------- move closed tag up inside');
         moveTagUpBackword(closed, opened.level, opened.node);
     }
+
+    fixTableTags.saveTmpTags(opened, closed);
 }
 
 // Move tag down along nodes chain, that contain another part of tag, towards end of document
