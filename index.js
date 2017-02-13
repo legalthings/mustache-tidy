@@ -6,6 +6,7 @@ var debug = script('debug');
 var replaceEmptyNode = script('replace-empty-node');
 var moveTags = script('move-tags');
 var extendTags = script('extend-tags');
+var fixTableTags = script('fix-table-tags');
 
 // Module variables
 var jsdom = domConfig.jsdom;
@@ -54,12 +55,14 @@ function mustacheTidy(html, options) {
 
         if (!options) options = {};
         options.doc = doc;
+        options.fixTableTags = fixTableTags;
 
         debug.init(options);
         utils.init(options);
         replaceEmptyNode.init(options);
         moveTags.init(options);
         extendTags.init(options);
+        fixTableTags.init(options);
     }
 
     // Launch processing given html source
@@ -192,7 +195,7 @@ function mustacheTidy(html, options) {
         }
     }
 
-    // Perform tidy on mustache tag
+    // Perform tidy on mustache tag section
     function tidyTag(data) {
         log('======= start tidy: ', data.opened.tag, data.closed.tag);
 
@@ -208,32 +211,30 @@ function mustacheTidy(html, options) {
             replaceEmptyNode.run(opened, closed, 'both');
         }
 
-        // Tag is aready positioned correctly
-        if (opened.node.parentElement === closed.node.parentElement) {
-            return removeEmptyTag(opened, closed);
+        if (opened.node.parentElement !== closed.node.parentElement) {
+            var relation = opened.node.parentElement.compareDocumentPosition(closed.node.parentElement);
+
+            if (relation & Node.DOCUMENT_POSITION_CONTAINS) {
+
+                // Closing tag is in ancestor node of opening tag
+                moveTags.handleCaseClosedIsAncestor(opened, closed);
+                if (opened.level !== closed.level) extendTags.extendTagForward(opened, closed);
+
+            } else if (relation & Node.DOCUMENT_POSITION_CONTAINED_BY) {
+
+                // Opening tag is in ancestor node of closing tag
+                moveTags.handleCaseOpenedIsAncestor(opened, closed);
+                if (opened.level !== closed.level) extendTags.extendTagBack(opened, closed);
+
+            } else {
+
+                // Tags are not in ancestor nodes of each other
+                moveTags.handleCaseSeparateTrees(opened, closed);
+                if (opened.node.parentElement !== closed.node.parentElement) extendTags.extendSeparatedTagParts(opened, closed);
+            }
         }
 
-        var relation = opened.node.parentElement.compareDocumentPosition(closed.node.parentElement);
-
-        if (relation & Node.DOCUMENT_POSITION_CONTAINS) {
-
-            // Closing tag is in ancestor node of opening tag
-            moveTags.handleCaseClosedIsAncestor(opened, closed);
-            if (opened.level !== closed.level) extendTags.extendTagForward(opened, closed);
-
-        } else if (relation & Node.DOCUMENT_POSITION_CONTAINED_BY) {
-
-            // Opening tag is in ancestor node of closing tag
-            moveTags.handleCaseOpenedIsAncestor(opened, closed);
-            if (opened.level !== closed.level) extendTags.extendTagBack(opened, closed);
-
-        } else {
-
-            // Tags are not in ancestor nodes of each other
-            moveTags.handleCaseSeparateTrees(opened, closed);
-            if (opened.node.parentElement !== closed.node.parentElement) extendTags.extendSeparatedTagParts(opened, closed);
-        }
-
+        fixTableTags.handleTmpTags();
         moveTags.removePlaceholders();
         removeEmptyTag(opened, closed);
     }
