@@ -6,7 +6,8 @@ var Node = domConfig.Node;
 module.exports = {
     init: init,
     log: log,
-    logResult: logResult
+    logResult: logResult,
+    hideInvalidTags: hideInvalidTags
 }
 
 // Static
@@ -61,6 +62,40 @@ function logResult(root) {
 
     function levelIndent(level) {
         return level ? repeatString(' ', level * 4) : '';
+    }
+}
+
+// Replace not closed or wrongly closed tags with placeholders, to see that they were not processed
+function hideInvalidTags(notClosed, wrongClosed) {
+    if (!options.debug) return;
+
+    var data = null;
+
+    for (var name in notClosed) {
+        data = notClosed[name];
+
+        for (var i = 0; i < data.length; i++) {
+            hideTag(data[i]);
+        }
+    }
+
+    for (var i = 0; i < wrongClosed.length; i++) {
+        data = wrongClosed[i];
+
+        hideTag(data.closed);
+        if (data.opened) hideTag(data.opened);
+    }
+
+    // Do replace
+    function hideTag(data) {
+        var node = data.node;
+        var text = node.nodeValue;
+        var index = data.index;
+        var length = data.tag.length;
+
+        node.nodeValue = text.substring(0, index + 1) + '#' + text.substr(index + 2, length - 4) + '#' + text.substring(index - 1 + length);
+
+        log('replace ->', text, '<- with ->', node.nodeValue);
     }
 }
 
