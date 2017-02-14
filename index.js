@@ -9,6 +9,7 @@ var extendTags = script('extend-tags');
 var fixTableTags = script('fix-table-tags');
 
 // Module variables
+var isFrontEnd = typeof window !== 'undefined';
 var jsdom = domConfig.jsdom;
 var Node = domConfig.Node;
 var repeatString = utils.repeatString;
@@ -32,6 +33,7 @@ function script(module) {
 function mustacheTidy(html, options) {
     var doc = null;
     var root = null;
+    var returnResult = false;
 
     var notClosed = {};
     var wrongClosed = [];
@@ -44,17 +46,40 @@ function mustacheTidy(html, options) {
 
     init();
     tidy(root);
+    debug.hideInvalidTags(notClosed, wrongClosed);
     debug.logResult(root);
 
-    return root.lastChild.innerHTML;
+    if (returnResult) {
+        return isFrontEnd ? root.innerHTML : root.lastChild.innerHTML;
+    }
+
+    return null;
 
     // Init dom tree
     function init() {
-        doc = jsdom(html).defaultView.document;
-        root = doc.documentElement;
+        if (isFrontEnd) {
+            // On front-end input can be either string or DOM Node
+            doc = document;
+
+            if (typeof html === 'string') {
+                returnResult = true;
+                root = document.createElement('div');
+                root.innerHTML = html;
+            } else if (html instanceof Node) {
+                root = html;
+            } else {
+                throw 'You should pass either a string with text/html to mustache-tidy, or DOM node, containing target html';
+            }
+        } else {
+            // In node.js we expect only string input
+            doc = jsdom(html).defaultView.document;
+            root = doc.documentElement;
+            returnResult = true;
+        }
 
         if (!options) options = {};
         options.doc = doc;
+        options.root = root;
         options.fixTableTags = fixTableTags;
 
         debug.init(options);

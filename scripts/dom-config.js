@@ -1,14 +1,23 @@
 
+var isFrontEnd = typeof window !== 'undefined';
+
 // Set dependencies
-var jsdom = require('jsdom');
-jsdom.defaultDocumentFeatures = {
-    FetchExternalResources: false,
-    ProcessExternalResources: false
-};
+if (!isFrontEnd) {
+    var jsdom = require('jsdom');
+    jsdom.defaultDocumentFeatures = {
+        FetchExternalResources: false,
+        ProcessExternalResources: false
+    };
 
-var Node = require('jsdom/lib/jsdom/living/generated/Node.js');
+    var jsnode = require('jsdom/lib/jsdom/living/generated/Node.js');
 
-module.exports = {
-    jsdom: jsdom.jsdom,
-    Node: Node.expose.Window.Node
+    module.exports = {
+        jsdom: jsdom.jsdom,
+        Node: jsnode.expose.Window.Node
+    }
+} else {
+    module.exports = {
+        jsdom: null,
+        Node: Node
+    }
 }

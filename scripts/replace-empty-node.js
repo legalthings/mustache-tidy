@@ -2,10 +2,11 @@
 // Set dependencies
 var domConfig = require('./dom-config');
 var debug = require('./debug');
-var Node = domConfig.Node;
-var log = debug.log;
 
 // Static variable
+var Node = domConfig.Node;
+var log = debug.log;
+var root = null;
 var replacableNodes = {'P': 1, 'DIV': 1, 'SPAN': 1, 'I': 1, 'EM': 1, 'STRONG': 1, 'LI': 1};
 
 module.exports = {
@@ -16,6 +17,8 @@ module.exports = {
 // Init module options
 function init(config) {
     debug.init(config);
+
+    root = config.root;
 }
 
 // Replace parent node with tag, if tag is empty and node does not contain other data
