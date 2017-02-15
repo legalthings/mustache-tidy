@@ -1,18 +1,20 @@
 
 // Set dependencies
-var utils = require('./scripts/utils');
-var debug = require('./scripts/debug');
+var scripts = './scripts';
+var domConfig = require(scripts + '/dom-config');
+var utils = require(scripts + '/utils');
+var debug = require(scripts + '/debug');
 var tools = {
-    replaceEmptyNode: require('./scripts/replace-empty-node')
+    replaceEmptyNode: require(scripts + '/replace-empty-node'),
+    moveTags: require(scripts + '/move-tags')
 };
 
-var jsdom = utils.jsdom;
-var Node = utils.Node;
+// Module variables
+var jsdom = domConfig.jsdom;
+var Node = domConfig.Node;
 var repeatString = utils.repeatString;
 var log = debug.log;
-
-// Static variables
-mustacheTidy.regs = {
+var regs = {
     spaces: new RegExp('\\s+', 'g'),
     tagName: new RegExp('(?:[^"\']+|"[^"]+"|\'[^\']+\')', 'g'),
     tag: new RegExp('\\{\\{\\s*([#^/])([^}]*)\\}\\}', 'g')
@@ -28,30 +30,31 @@ function mustacheTidy(html, options) {
     var notClosed = {};
     var wrongClosed = [];
     var currentOpened = [];
-    var nodesWithPlaceholders = [];
     var tmpTableTags = {fromOpened: [], fromClosed: []};
 
-    for (var i = 0; i < mustacheTidy.regs.length; i++) {
-        mustacheTidy.regs[i].lastIndex = 0;
+    for (var i = 0; i < regs.length; i++) {
+        regs[i].lastIndex = 0;
     }
 
-    if (!options) options = {};
-
-    debug.init(options);
-    for (var name in tools) {
-        tools[name].init(options);
-    }
-
-    initDom();
+    init();
     tidy(root);
     debug.logResult(root);
 
     return root.lastChild.innerHTML;
 
     // Init dom tree
-    function initDom() {
+    function init() {
         doc = jsdom(html).defaultView.document;
         root = doc.documentElement;
+
+        if (!options) options = {};
+        options.doc = doc;
+
+        debug.init(options);
+        utils.init(options);
+        for (var name in tools) {
+            tools[name].init(options);
+        }
     }
 
     // Launch processing given html source
@@ -87,7 +90,6 @@ function mustacheTidy(html, options) {
         }
 
         var prev = node.nodeValue;
-        var regs = mustacheTidy.regs;
         regs.tag.lastIndex = 0;
 
         while (true) {
@@ -198,7 +200,22 @@ function mustacheTidy(html, options) {
         }
 
         if (opened.node === closed.node) {
-            tools.replaceEmptyNode.run(opened, closed, 'both');
+            return tools.replaceEmptyNode.run(opened, closed, 'both');
         }
+
+        // Tag is aready positioned correctly
+        if (opened.node.parentElement === closed.node.parentElement) return;
+
+        var relation = opened.node.parentElement.compareDocumentPosition(closed.node.parentElement);
+
+        if (relation & Node.DOCUMENT_POSITION_CONTAINS) {
+            tools.moveTags.handleCaseClosedIsAncestor(opened, closed);
+        } else if (relation & Node.DOCUMENT_POSITION_CONTAINED_BY) {
+            tools.moveTags.handleCaseOpenedIsAncestor(opened, closed);
+        } else {
+            tools.moveTags.handleCaseSeparateTrees(opened, closed);
+        }
+
+        tools.moveTags.removePlaceholders();
     }
 }
