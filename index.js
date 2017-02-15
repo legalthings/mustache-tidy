@@ -1,18 +1,18 @@
 
 // Set dependencies
-var scripts = './scripts';
-var domConfig = require(scripts + '/dom-config');
-var utils = require(scripts + '/utils');
-var debug = require(scripts + '/debug');
-var tools = {
-    replaceEmptyNode: require(scripts + '/replace-empty-node'),
-    moveTags: require(scripts + '/move-tags')
-};
+var domConfig = script('dom-config');
+var utils = script('utils');
+var debug = script('debug');
+var replaceEmptyNode = script('replace-empty-node');
+var moveTags = script('move-tags');
+var extendTags = script('extend-tags');
 
 // Module variables
 var jsdom = domConfig.jsdom;
 var Node = domConfig.Node;
 var repeatString = utils.repeatString;
+var startsWithTag = utils.startsWithTag;
+var endsWithTag = utils.endsWithTag;
 var log = debug.log;
 var regs = {
     spaces: new RegExp('\\s+', 'g'),
@@ -21,6 +21,11 @@ var regs = {
 };
 
 module.exports = mustacheTidy;
+
+// Require script
+function script(module) {
+    return require('./scripts/' + module);
+}
 
 // Base lib function
 function mustacheTidy(html, options) {
@@ -52,9 +57,9 @@ function mustacheTidy(html, options) {
 
         debug.init(options);
         utils.init(options);
-        for (var name in tools) {
-            tools[name].init(options);
-        }
+        replaceEmptyNode.init(options);
+        moveTags.init(options);
+        extendTags.init(options);
     }
 
     // Launch processing given html source
@@ -112,7 +117,7 @@ function mustacheTidy(html, options) {
         }
     }
 
-    // Handle opened mustache tag
+    // Handle opened mustache tag. Just mark it as opened and save basic data
     function handleOpenedTag(node, match, level) {
         var name = match[2];
 
@@ -195,27 +200,75 @@ function mustacheTidy(html, options) {
         var closed = data.closed;
 
         if (opened.node !== closed.node) {
-            tools.replaceEmptyNode.run(opened, closed, 'opened');
-            tools.replaceEmptyNode.run(closed, opened, 'closed');
+            replaceEmptyNode.run(opened, closed, 'opened');
+            replaceEmptyNode.run(closed, opened, 'closed');
         }
 
         if (opened.node === closed.node) {
-            return tools.replaceEmptyNode.run(opened, closed, 'both');
+            replaceEmptyNode.run(opened, closed, 'both');
         }
 
         // Tag is aready positioned correctly
-        if (opened.node.parentElement === closed.node.parentElement) return;
+        if (opened.node.parentElement === closed.node.parentElement) {
+            return removeEmptyTag(opened, closed);
+        }
 
         var relation = opened.node.parentElement.compareDocumentPosition(closed.node.parentElement);
 
         if (relation & Node.DOCUMENT_POSITION_CONTAINS) {
-            tools.moveTags.handleCaseClosedIsAncestor(opened, closed);
+
+            // Closing tag is in ancestor node of opening tag
+            moveTags.handleCaseClosedIsAncestor(opened, closed);
+            if (opened.level !== closed.level) extendTags.extendTagForward(opened, closed);
+
         } else if (relation & Node.DOCUMENT_POSITION_CONTAINED_BY) {
-            tools.moveTags.handleCaseOpenedIsAncestor(opened, closed);
+
+            // Opening tag is in ancestor node of closing tag
+            moveTags.handleCaseOpenedIsAncestor(opened, closed);
+            if (opened.level !== closed.level) extendTags.extendTagBack(opened, closed);
+
         } else {
-            tools.moveTags.handleCaseSeparateTrees(opened, closed);
+
+            // Tags are not in ancestor nodes of each other
+            moveTags.handleCaseSeparateTrees(opened, closed);
+            if (opened.node.parentElement !== closed.node.parentElement) extendTags.extendSeparatedTagParts(opened, closed);
         }
 
-        tools.moveTags.removePlaceholders();
+        moveTags.removePlaceholders();
+        removeEmptyTag(opened, closed);
+    }
+
+    // If tag section holds no data, remove it
+    function removeEmptyTag(opened, closed) {
+        var text = null;
+
+        log('removing nodes: ', opened, closed, opened.node, closed.node);
+
+        // Tags are in same text node
+        if (opened.node === closed.node) {
+            text = opened.node.nodeValue;
+            var inner = text.substring(opened.index + opened.tag.length, closed.index);
+            if (!inner.trim().length) {
+                opened.node.nodeValue = text.substring(0, opened.index) + text.substring(closed.index + closed.tag.length);
+                opened.node = closed.node = null;
+            }
+
+            return;
+        }
+
+        var parent = opened.node.parentElement;
+        var empty = parent && opened.node.nextSibling === closed.node && endsWithTag(opened) && startsWithTag(closed);
+        if (!empty) return;
+
+        // Tags are in different text nodes
+        startsWithTag(opened) ?
+            parent.removeChild(opened.node) :
+            opened.node.nodeValue = opened.node.nodeValue.substring(0, opened.index);
+
+        endsWithTag(closed) ?
+            parent.removeChild(closed.node) :
+            closed.node.nodeValue = closed.node.nodeValue.substring(closed.index + closed.tag.length);
+
+        opened.node = closed.node = null;
     }
 }
