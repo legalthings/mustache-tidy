@@ -25,9 +25,7 @@ describe('Moving tags', function() {
                 '{{/tag}}' +
             '</div>');
     });
-});
 
-describe('Moving tags', function() {
     it('should move closing tag up, to parent node of opening tag', function() {
         var input = `
             <div>
@@ -52,9 +50,7 @@ describe('Moving tags', function() {
                 '{{/tag}}' +
             '</div>');
     });
-});
 
-describe('Moving tags', function() {
     it('should move opening tag up, till data, and then closing tag down, till new parent node of opening', function() {
         var input = `
             <div>
@@ -81,9 +77,7 @@ describe('Moving tags', function() {
             '</div>'
         );
     });
-});
 
-describe('Moving tags', function() {
     it('should move closing tag up, till data, and then opening tag down, till new parent node of closing', function() {
         var input = `
             <div>
@@ -110,9 +104,7 @@ describe('Moving tags', function() {
             '</div>'
         );
     });
-});
 
-describe('Moving tags', function() {
     it('should move both tags up to common ancestor node, outside of tag section', function() {
         var input = `
             <div>
@@ -147,9 +139,7 @@ describe('Moving tags', function() {
             '</div>'
         );
     });
-});
 
-describe('Moving tags', function() {
     it('should move both tags up to common ancestor node, inside tag section', function() {
         var input = `
             <div>
@@ -186,9 +176,7 @@ describe('Moving tags', function() {
             '</div>'
         );
     });
-});
 
-describe('Moving tags', function() {
     it('should move both tags up to common ancestor node, inside tag section, and then remove tags as empty', function() {
         var input = `
             <div>
@@ -221,9 +209,7 @@ describe('Moving tags', function() {
             '</div>'
         );
     });
-});
 
-describe('Moving tags', function() {
     it('should correctly work with replacing empty nodes', function() {
         var input = `
             <p>{{# foo }}</p>
