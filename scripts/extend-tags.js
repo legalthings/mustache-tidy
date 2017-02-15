@@ -11,6 +11,10 @@ var startsWithTag = utils.startsWithTag;
 var endsWithTag = utils.endsWithTag;
 var Node = domConfig.Node;
 var log = debug.log;
+var fixTableTags = null;
+var saveTmpTag = null;
+var isTmpTag = null;
+var unmarkTmpTagAfterMove = null;
 
 module.exports = {
     init: init,
@@ -23,6 +27,11 @@ module.exports = {
 function init(config) {
     debug.init(config);
     utils.init(config);
+
+    fixTableTags = config.fixTableTags;
+    saveTmpTag = fixTableTags.saveTmpTag;
+    isTmpTag = fixTableTags.isTmpTag;
+    unmarkTmpTagAfterMove = fixTableTags.unmarkTmpTagAfterMove;
 }
 
 // Extend tag, if it's parts are in separate node trees
@@ -50,9 +59,11 @@ function extendSeparatedTagParts(opened, closed) {
 
 // Correctly surround by tag all data that's nested inside it, to avoid partial nodes removal.
 // Moving up the node tree, from opened to closed
+// If tags are created in tables outside table cells, mark tags as temporary
 function extendTagForward(opened, closed, tillCommonAncestor) {
     log('-------------- extend tag forward');
 
+    var tmpGroup = 'fromOpened';
     var level = opened.level;
     var parent = opened.node;
     var newClosed = null;
@@ -62,11 +73,14 @@ function extendTagForward(opened, closed, tillCommonAncestor) {
         opened.node.parentElement.appendChild(newClosed);
     }
 
+    unmarkTmpTagAfterMove(tmpGroup);
+
     while (true) {
         level--;
         parent = parent.parentElement;
 
         if (!parent.nextSibling) continue;
+        if (isTmpTag(opened)) saveTmpTag(tmpGroup, opened.node, newClosed);
 
         updateTextNodeData(opened, level);
         parent.parentElement.insertBefore(opened.node, parent.nextSibling);
@@ -75,13 +89,17 @@ function extendTagForward(opened, closed, tillCommonAncestor) {
         newClosed = createTextNode(closed.tag);
         parent.parentElement.appendChild(newClosed);
     }
+
+    if (isTmpTag(opened)) saveTmpTag(tmpGroup, opened.node, null);
 }
 
 // Correctly surround by tag all data that's nested inside it, to avoid partial nodes removal.
 // Moving up the node tree, from closed to opened
+// If tags are created in tables outside table cells, mark tags as temporary
 function extendTagBack(opened, closed, tillCommonAncestor) {
     log('-------------- extend tag back');
 
+    var tmpGroup = 'fromClosed';
     var level = closed.level;
     var parent = closed.node.parentElement;
     var newOpened = null;
@@ -91,6 +109,7 @@ function extendTagBack(opened, closed, tillCommonAncestor) {
         parent.insertBefore(newOpened, parent.firstChild);
     }
 
+    unmarkTmpTagAfterMove(tmpGroup);
     parent = closed.node;
 
     while (true) {
@@ -98,6 +117,7 @@ function extendTagBack(opened, closed, tillCommonAncestor) {
         parent = parent.parentElement;
 
         if (!parent.previousSibling) continue;
+        if (isTmpTag(closed)) saveTmpTag(tmpGroup, newOpened, closed.node);
 
         updateTextNodeData(closed, level);
         parent.parentElement.insertBefore(closed.node, parent);
@@ -106,4 +126,6 @@ function extendTagBack(opened, closed, tillCommonAncestor) {
         newOpened = createTextNode(opened.tag);
         parent.parentElement.insertBefore(newOpened, parent.parentElement.firstChild);
     }
+
+    if (isTmpTag(closed)) saveTmpTag(tmpGroup, null, closed.node);
 }
