@@ -7,12 +7,15 @@
     "url": "git@github.com:legalthings/mustache-tidy.git"
   },
   "dependencies": {
-    "jsdom": "^9.9.1"
+    "jsdom": "^9.9.1",
+    "webpack": "^2.2.1"
   },
   "devDependencies": {
     "jasmine-node": "^1.14.5"
   },
   "scripts": {
-    "test": "./node_modules/.bin/jasmine-node spec"
+    "test": "./node_modules/.bin/jasmine-node spec",
+    "dev": "./node_modules/.bin/webpack --config webpack.config.js --env dev",
+    "build": "./node_modules/.bin/webpack --config webpack.config.js --env prod"
   }
 }
