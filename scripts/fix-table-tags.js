@@ -17,7 +17,8 @@ module.exports = {
     isTmpTag: isTmpTag,
     saveTmpTags: saveTmpTags,
     saveTmpTag: saveTmpTag,
-    unmarkTmpTagAfterMove: unmarkTmpTagAfterMove
+    unmarkTmpTagAfterMove: unmarkTmpTagAfterMove,
+    tableCells: tableCells
 };
 
 // Init module options
@@ -96,13 +97,13 @@ function isTmpTag(data) {
     return !!tableContainers[data.node.parentElement.nodeName];
 }
 
-// After moving tags, mark them as tmp, because they are created inside no-tags table area. They would be deleted afterwords
+// After moving tags, mark them as tmp, if they are created inside no-tags table area. They would be deleted afterwords
 function saveTmpTags(opened, closed) {
     if (isTmpTag(opened)) saveTmpTag('fromOpened', opened.node, null);
     if (isTmpTag(closed)) saveTmpTag('fromClosed', null, closed.node);
 }
 
-// When extending tags, mark newly created tags as tmp, because they are created inside no-tags table area. They would be deleted afterwords
+// When extending tags, mark newly created tags as tmp, if they are created inside no-tags table area. They would be deleted afterwords
 function saveTmpTag(group, openedNode, closedNode) {
     tmpTableTags[group].push({
         opened: openedNode,

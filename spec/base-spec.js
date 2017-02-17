@@ -12,36 +12,63 @@ describe('Basic html processing', function() {
         expect(result).toBe('<div>Data</div>');
     });
 
-    it('should not change correct tags in same text node', function() {
+    it('should not handle single opening tag', function() {
         var input = `
             <div>
-                {{#tag}}Data{{/tag}}
+                {{#tag}}
             </div>
         `;
 
         var result = tidy(input);
-        expect(result).toBe('<div>{{#tag}}Data{{/tag}}</div>');
+        expect(result).toBe('<div>{{#tag}}</div>');
     });
 
-    it('should not change correct tags in different text nodes', function() {
+    it('should not handle single closing tag', function() {
         var input = `
             <div>
-                {{#tag}}
-                <span>Data</span>
                 {{/tag}}
             </div>
         `;
 
         var result = tidy(input);
-        expect(result).toBe('<div>{{#tag}}<span>Data</span>{{/tag}}</div>');
+        expect(result).toBe('<div>{{/tag}}</div>');
     });
 
-    it('should remove empty tags', function() {
-        var input = `
-            {{^tag}} {{/tag}}
-        `;
-
+    it('should correctly handle input edge cases', function() {
+        var input = null;
         var result = tidy(input);
+        expect(result).toBe(null);
+
+        input = false;
+        result = tidy(input);
+        expect(result).toBe(null);
+
+        input = true;
+        result = tidy(input);
+        expect(result).toBe(null);
+
+        input = 0;
+        result = tidy(input);
+        expect(result).toBe(null);
+
+        input = [];
+        result = tidy(input);
+        expect(result).toBe(null);
+
+        input = {};
+        result = tidy(input);
+        expect(result).toBe(null);
+
+        input = '';
+        result = tidy(input);
         expect(result).toBe('');
+
+        input = '0';
+        result = tidy(input);
+        expect(result).toBe('0');
+
+        input = 'data';
+        result = tidy(input);
+        expect(result).toBe('data');
     });
 });

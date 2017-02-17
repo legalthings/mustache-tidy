@@ -453,6 +453,50 @@ becomes
 </table>
 ```
 
+### 5. Improve tags
+
+After previous steps all tags are fixed, so no DOM nodes will partially disappear if some sections get hidden. But we can still do some improvement for tags:
+
+- merge same sibling tag sections
+- rise section from the containing node, if section contains all node's content
+
+#### 5a. Merge same sections
+
+If same tag section repeats more than one time, and there is no data between these sections, we can merge them into single section. This improves readability of document and it's processing speed. Consider the example:
+
+```hmtl
+    <div>
+        {{#tag}}<span>Data</span>{{/tag}}
+        {{#tag}}<span>Data</span>{{/tag}}
+    </div>
+```
+
+After merging it becomes:
+
+```hmtl
+    <div>
+        {{#tag}}
+        <span>Data</span>
+        <span>Data</span>
+        {{/tag}}
+    </div>
+```
+
+#### 5b. Rise section from it's parent node
+
+If section from previous example gets hidden, we'll end up with empty `div` node. It's of no use, so it would be better if it was hidden together with section. So we should include it inside section, and result of this operation is:
+
+```hmtl
+    {{#tag}}
+    <div>
+        <span>Data</span>
+        <span>Data</span>
+    </div>
+    {{/tag}}
+```
+
+That's it. Now we have good user-friendly template:)
+
 ## Limitations
 
 Currently the following sections structures are supported:

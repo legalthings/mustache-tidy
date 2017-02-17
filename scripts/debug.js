@@ -1,5 +1,6 @@
 
 // Set dependencies
+var env = require('./env');
 var domConfig = require('./dom-config');
 var Node = domConfig.Node;
 
@@ -21,12 +22,16 @@ function init(config) {
 // Logging
 function log() {
     if (!options.debug) return;
+    if (env.isFrontEnd) return console.log.apply(console, arguments);
 
-    // Debug for text dom nodes
+    // Debug for text dom nodes in node.js
     var args = Array.prototype.slice.apply(arguments);
     for (var i = 0; i < args.length; i++) {
-        if (args[i] === null || typeof args[i] !== 'object' || typeof args[i].nodeType === 'undefined') continue;
-        if (args[i].nodeType === Node.TEXT_NODE) {
+        if (args[i] === null || typeof args[i] !== 'object' || typeof args[i].nodeType === 'undefined' || typeof args[i].node === 'undefined') continue;
+
+        if (args[i].node && typeof args[i].node === 'object' && args[i].node.nodeType === Node.TEXT_NODE) {
+            args[i].node = '"' + args[i].node.nodeValue + '"';
+        } else if (args[i].nodeType === Node.TEXT_NODE) {
             args[i] = '"' + args[i].nodeValue + '"';
         }
     }

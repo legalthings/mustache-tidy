@@ -1,8 +1,8 @@
 
-var isFrontEnd = typeof window !== 'undefined';
+var env = require('./env');
 
 // Set dependencies
-if (!isFrontEnd) {
+if (!env.isFrontEnd) {
     var jsdom = require('jsdom');
     jsdom.defaultDocumentFeatures = {
         FetchExternalResources: false,
