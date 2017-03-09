@@ -3,13 +3,14 @@
 var domConfig = script('dom-config');
 var utils = script('utils');
 var debug = script('debug');
+var env = script('env');
 var replaceEmptyNode = script('replace-empty-node');
 var moveTags = script('move-tags');
 var extendTags = script('extend-tags');
 var fixTableTags = script('fix-table-tags');
+var improveTags = script('improve-tags');
 
 // Module variables
-var isFrontEnd = typeof window !== 'undefined';
 var jsdom = domConfig.jsdom;
 var Node = domConfig.Node;
 var repeatString = utils.repeatString;
@@ -31,56 +32,46 @@ function script(module) {
 
 // Base lib function
 function mustacheTidy(html, options) {
+    if (typeof html !== 'string' && !(html instanceof Node)) return null;
+
     var doc = null;
     var root = null;
     var returnResult = false;
 
-    var notClosed = {};
-    var wrongClosed = [];
-    var currentOpened = [];
-    var tmpTableTags = {fromOpened: [], fromClosed: []};
+    var step;
+    var improve;
+    var notClosed;
+    var wrongClosed;
+    var currentOpened;
 
-    for (var i = 0; i < regs.length; i++) {
-        regs[i].lastIndex = 0;
-    }
+    initDom();
+    initVars('1:tidy');
+    tidy();
+    if (root instanceof Node) root.normalize();
 
-    init();
-    tidy(root);
+    initVars('2:improve');
+    tidy();
+    improveTags.run(improve);
+
+    initVars('3:fix-tables');
+    tidy();
+
     debug.hideInvalidTags(notClosed, wrongClosed);
     debug.logResult(root);
 
-    if (returnResult) {
-        return isFrontEnd ? root.innerHTML : root.lastChild.innerHTML;
-    }
+    return returnResult ? root.innerHTML : null;
 
-    return null;
-
-    // Init dom tree
-    function init() {
-        if (isFrontEnd) {
-            // On front-end input can be either string or DOM Node
-            doc = document;
-
-            if (typeof html === 'string') {
-                returnResult = true;
-                root = document.createElement('div');
-                root.innerHTML = html;
-            } else if (html instanceof Node) {
-                root = html;
-            } else {
-                throw 'You should pass either a string with text/html to mustache-tidy, or DOM node, containing target html';
-            }
-        } else {
-            // In node.js we expect only string input
-            doc = jsdom(html).defaultView.document;
-            root = doc.documentElement;
-            returnResult = true;
+    // Init variables and modules
+    function initVars(doStep) {
+        for (var i = 0; i < regs.length; i++) {
+            regs[i].lastIndex = 0;
         }
 
-        if (!options) options = {};
-        options.doc = doc;
-        options.root = root;
-        options.fixTableTags = fixTableTags;
+        step = doStep;
+        improve = [];
+        notClosed = {};
+        wrongClosed = [];
+        currentOpened = [];
 
         debug.init(options);
         utils.init(options);
@@ -88,6 +79,33 @@ function mustacheTidy(html, options) {
         moveTags.init(options);
         extendTags.init(options);
         fixTableTags.init(options);
+        improveTags.init(options);
+    }
+
+    // Init dom tree
+    function initDom() {
+        if (env.isFrontEnd) {
+            // On front-end input can be either string or DOM Node
+            doc = document;
+
+            if (typeof html === 'string') {
+                returnResult = true;
+                root = document.createElement('div');
+                root.innerHTML = html;
+            } else {
+                root = html;
+            }
+        } else {
+            // In node.js we expect only string input
+            doc = jsdom(html).defaultView.document;
+            root = doc.documentElement.lastChild;
+            returnResult = true;
+        }
+
+        if (!options) options = {};
+        options.doc = doc;
+        options.root = root;
+        options.regs = regs;
     }
 
     // Launch processing given html source
@@ -148,20 +166,24 @@ function mustacheTidy(html, options) {
     // Handle opened mustache tag. Just mark it as opened and save basic data
     function handleOpenedTag(node, match, level) {
         var name = match[2];
-
-        // Register tag as opened
-        currentOpened.push(name);
-
         var data = {
-            node: node,
+            name: name,
+            type: match[1],
             tag: match[0],
+            node: node,
             index: match.index,
             level: level,
-            openedKey: currentOpened.length - 1
+            openedKey: currentOpened.length
         };
 
+        // Register tag as opened
         if (typeof notClosed[name] === 'undefined') notClosed[name] = [];
+        if (step === '2:improve') {
+            data.improveKey = improve.length;
+            improve.push({opened: data});
+        }
         notClosed[name].push(data);
+        currentOpened.push(name);
 
         log('opened: ', name);
     }
@@ -213,10 +235,13 @@ function mustacheTidy(html, options) {
 
             log('closed: ', name);
 
-            tidyTag({
-                opened: opened,
-                closed: data
-            });
+            if (step === '1:tidy') {
+                tidyTag({opened: opened, closed: data});
+            } else if (step === '2:improve') {
+                improve[opened.improveKey].closed = data;
+            } else if (step === '3:fix-tables') {
+                fixTableTags.run({opened: opened, closed: data});
+            }
         }
     }
 
@@ -259,7 +284,6 @@ function mustacheTidy(html, options) {
             }
         }
 
-        fixTableTags.handleTmpTags();
         moveTags.removePlaceholders();
         removeEmptyTag(opened, closed);
     }
@@ -267,8 +291,6 @@ function mustacheTidy(html, options) {
     // If tag section holds no data, remove it
     function removeEmptyTag(opened, closed) {
         var text = null;
-
-        log('removing nodes: ', opened, closed, opened.node, closed.node);
 
         // Tags are in same text node
         if (opened.node === closed.node) {

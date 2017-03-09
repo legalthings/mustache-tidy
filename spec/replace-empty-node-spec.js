@@ -2,6 +2,15 @@ var tidy = require('../');
 
 describe('Replacing empty dom nodes with containing tags', function() {
 
+    it('should remove empty tag', function() {
+        var input = `
+            {{^tag}} {{/tag}}
+        `;
+
+        var result = tidy(input);
+        expect(result).toBe('');
+    });
+
     it('should recursively replace nodes for opening tag', function() {
         var input = `
             <div>
@@ -111,7 +120,7 @@ describe('Replacing empty dom nodes with containing tags', function() {
         expect(result).toBe('');
     });
 
-    it('should recursively replace both tags nodes, untill common ancestor node', function() {
+    it('should recursively replace both tags nodes, untill common ancestor node, and then rise tag up', function() {
         var input = `
             <div>
                 <div>
@@ -129,7 +138,7 @@ describe('Replacing empty dom nodes with containing tags', function() {
         `;
 
         var result = tidy(input);
-        expect(result).toBe('<div>{{#tag}}Data{{/tag}}</div>');
+        expect(result).toBe('{{#tag}}<div>Data</div>{{/tag}}');
     });
 
     it('should recursively replace both tags nodes and root nodes, and then remove tags as empty', function() {
@@ -266,17 +275,6 @@ describe('Replacing empty dom nodes with containing tags', function() {
         expect(result).toBe('{{#tag}}<div>Data</div>{{/tag}}');
     });
 
-    it('should not replace tags node with inner data', function() {
-        var input = `
-            <div>
-                {{#tag}}Data{{/tag}}
-            </div>
-        `;
-
-        var result = tidy(input);
-        expect(result).toBe('<div>{{#tag}}Data{{/tag}}</div>');
-    });
-
     it('should not replace tags node with outer following data, but should remove tags as empty', function() {
         var input = `
             <div>
@@ -317,7 +315,7 @@ describe('Replacing empty dom nodes with containing tags', function() {
         `;
 
         var result = tidy(input);
-        expect(result).toBe('<div>{{#tag}}Data{{/}}</div>');
+        expect(result).toBe('{{#tag}}<div>Data</div>{{/}}');
     });
 
     it('should not replace empty nodes, that do not contain tags', function() {

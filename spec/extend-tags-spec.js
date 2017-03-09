@@ -47,9 +47,7 @@ describe('Extending tags', function() {
             '</div>'
         );
     });
-});
 
-describe('Extending tags', function() {
     it('should extend closing tag up, to parent node of opening tag', function() {
         var input = `
             <div>
@@ -96,9 +94,7 @@ describe('Extending tags', function() {
             '</div>'
         );
     });
-});
 
-describe('Extending tags', function() {
     it('should extend both tags up, to common ancestor', function() {
         var input = `
             <div>
@@ -171,9 +167,7 @@ describe('Extending tags', function() {
             '</div>'
         );
     });
-});
 
-describe('Extending tags', function() {
     it('should extend both tags up, to common ancestor, and then remove top empty tag', function() {
         var input = `
             <div>

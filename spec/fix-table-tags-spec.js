@@ -227,4 +227,78 @@ describe('Extending tags', function() {
             '</table>'
         );
     });
+
+    it('should move tags out of table', function() {
+        var input = `
+            <table>
+                <tbody>
+                    <tr>
+                        <td>{{#foo}}{{^bar}}hello</td>
+                        <td>world</td>
+                    </tr>
+                    <tr>
+                        <td>goodbye</td>
+                        <td>moon{{/bar}}{{/foo}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        `;
+
+        var result = tidy(input);
+        expect(result).toBe(
+            '{{#foo}}' +
+            '{{^bar}}' +
+            '<table>' +
+                '<tbody>' +
+                    '<tr>' +
+                        '<td>hello</td>' +
+                        '<td>world</td>' +
+                    '</tr>' +
+                    '<tr>' +
+                        '<td>goodbye</td>' +
+                        '<td>moon</td>' +
+                    '</tr>' +
+                '</tbody>' +
+            '</table>' +
+            '{{/bar}}' +
+            '{{/foo}}'
+        );
+    });
+
+    it('should corectly extend nested tags on table cells', function() {
+        var input = `
+            <table>
+                <tbody>
+                    <tr>
+                        <td>Data</td>
+                        <td>{{#foo}}{{^bar}}hello</td>
+                        <td>world</td>
+                    </tr>
+                    <tr>
+                        <td>goodbye</td>
+                        <td>moon{{/bar}}{{/foo}}</td>
+                        <td>Data</td>
+                    </tr>
+                </tbody>
+            </table>
+        `;
+
+        var result = tidy(input);
+        expect(result).toBe(
+            '<table>' +
+                '<tbody>' +
+                    '<tr>' +
+                        '<td>Data</td>' +
+                        '<td>{{#foo}}{{^bar}}hello{{/bar}}{{/foo}}</td>' +
+                        '<td>{{#foo}}{{^bar}}world{{/bar}}{{/foo}}</td>' +
+                    '</tr>' +
+                    '<tr>' +
+                        '<td>{{#foo}}{{^bar}}goodbye{{/bar}}{{/foo}}</td>' +
+                        '<td>{{#foo}}{{^bar}}moon{{/bar}}{{/foo}}</td>' +
+                        '<td>Data</td>' +
+                    '</tr>' +
+                '</tbody>' +
+            '</table>'
+        );
+    });
 });

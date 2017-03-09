@@ -1,7 +1,7 @@
 var tidy = require('../');
 
 describe('Moving tags', function() {
-    it('should move opening tag up, to parent node of closing tag', function() {
+    it('should move opening tag up, to parent node of closing tag, and then rise section up from parent node', function() {
         var input = `
             <div>
                 <div>
@@ -15,20 +15,19 @@ describe('Moving tags', function() {
 
         var result = tidy(input);
         expect(result).toBe(
+            '{{#tag}}' +
             '<div>' +
-                '{{#tag}}' +
                 '<div>' +
                     '<div>' +
                         '<p>Data</p>' +
                     '</div>' +
                 '</div>' +
-                '{{/tag}}' +
-            '</div>');
+            '</div>' +
+            '{{/tag}}'
+        );
     });
-});
 
-describe('Moving tags', function() {
-    it('should move closing tag up, to parent node of opening tag', function() {
+    it('should move closing tag up, to parent node of opening tag, and then rise section up from parent node', function() {
         var input = `
             <div>
                 {{#tag}}
@@ -42,19 +41,18 @@ describe('Moving tags', function() {
 
         var result = tidy(input);
         expect(result).toBe(
+            '{{#tag}}' +
             '<div>' +
-                '{{#tag}}' +
                 '<div>' +
                     '<div>' +
                         '<p>Data</p>' +
                     '</div>' +
                 '</div>' +
-                '{{/tag}}' +
-            '</div>');
+            '</div>' +
+            '{{/tag}}'
+        );
     });
-});
 
-describe('Moving tags', function() {
     it('should move opening tag up, till data, and then closing tag down, till new parent node of opening', function() {
         var input = `
             <div>
@@ -81,9 +79,7 @@ describe('Moving tags', function() {
             '</div>'
         );
     });
-});
 
-describe('Moving tags', function() {
     it('should move closing tag up, till data, and then opening tag down, till new parent node of closing', function() {
         var input = `
             <div>
@@ -110,10 +106,8 @@ describe('Moving tags', function() {
             '</div>'
         );
     });
-});
 
-describe('Moving tags', function() {
-    it('should move both tags up to common ancestor node, outside of tag section', function() {
+    it('should move both tags up to common ancestor node, outside of tag section, and then rise from parent node', function() {
         var input = `
             <div>
                 <div>
@@ -131,8 +125,8 @@ describe('Moving tags', function() {
 
         var result = tidy(input);
         expect(result).toBe(
+            '{{#tag}}' +
             '<div>' +
-                '{{#tag}}' +
                 '<div>' +
                     '<div>' +
                         '<p>Data</p>' +
@@ -143,13 +137,11 @@ describe('Moving tags', function() {
                         '<p>Data</p>' +
                     '</div>' +
                 '</div>' +
-                '{{/tag}}' +
-            '</div>'
+            '</div>' +
+            '{{/tag}}'
         );
     });
-});
 
-describe('Moving tags', function() {
     it('should move both tags up to common ancestor node, inside tag section', function() {
         var input = `
             <div>
@@ -186,9 +178,7 @@ describe('Moving tags', function() {
             '</div>'
         );
     });
-});
 
-describe('Moving tags', function() {
     it('should move both tags up to common ancestor node, inside tag section, and then remove tags as empty', function() {
         var input = `
             <div>
@@ -221,9 +211,7 @@ describe('Moving tags', function() {
             '</div>'
         );
     });
-});
 
-describe('Moving tags', function() {
     it('should correctly work with replacing empty nodes', function() {
         var input = `
             <p>{{# foo }}</p>
@@ -241,7 +229,7 @@ describe('Moving tags', function() {
             '{{/ foo }} {{^ foo }}' +
             '<p>Data 2</p>' +
             '{{/ foo }}' +
-            '<p>{{# bar }}Data 3{{/ bar }}</p>'
+            '{{# bar }}<p>Data 3</p>{{/ bar }}'
         );
     });
 });
