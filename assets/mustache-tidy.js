@@ -313,139 +313,12 @@ var utils = __webpack_require__(2);
 var debug = __webpack_require__(1);
 
 // Module variables
-var Node = domConfig.Node;
-var log = debug.log;
-var tmpTableTags = null;
-var tableContainers = {'TABLE': 1, 'THEAD': 1, 'TBODY': 1, 'TR': 1};
-var tableCells = {'TD': 1, 'TH': 1};
-
-module.exports = {
-    init: init,
-    handleTmpTags: handleTmpTags,
-    isTmpTag: isTmpTag,
-    saveTmpTags: saveTmpTags,
-    saveTmpTag: saveTmpTag,
-    unmarkTmpTagAfterMove: unmarkTmpTagAfterMove,
-    tableCells: tableCells
-};
-
-// Init module options
-function init(config) {
-    debug.init(config);
-    utils.init(config);
-
-    tmpTableTags = {fromOpened: [], fromClosed: []};
-}
-
-// Turn tmp tags, created in tables outside table cells, into correct tags inside cells
-function handleTmpTags() {
-    if (!tmpTableTags.fromOpened.length && !tmpTableTags.fromClosed.length) return;
-
-    var fromOpened = tmpTableTags.fromOpened;
-    var fromClosed = tmpTableTags.fromClosed;
-
-    // Handle tags created when extending opening tag
-    for (var i = 0; i < fromOpened.length - 1; i++) {
-        extendTmpTag(fromOpened[i].opened, fromOpened[i].closed);
-    }
-
-    if (fromOpened.length) {
-        var last = fromOpened[fromOpened.length - 1];
-        if (last.closed) {
-            extendTmpTag(last.opened, last.closed);
-        } else {
-            var lastBack = fromClosed.pop();
-            extendTmpTag(last.opened, lastBack.closed);
-        }
-    }
-
-    // Handle tags created when extending closing tag
-    for (var i = 0; i < fromClosed.length; i++) {
-        extendTmpTag(fromClosed[i].opened, fromClosed[i].closed);
-    }
-
-    fromOpened.length = 0;
-    fromClosed.length = 0;
-}
-
-// Extand tmp table tag to table cells, that are contained inside this tag
-function extendTmpTag(openedNode, closedNode) {
-    var next = openedNode;
-    var j = 0;
-
-    while (true) {
-        next = next.nextSibling;
-        if (next === closedNode) break;
-
-        processNode(next);
-        if (++j === 4) func();
-    }
-
-    openedNode.parentElement.removeChild(openedNode);
-    closedNode.parentElement.removeChild(closedNode);
-
-    function processNode(node) {
-        if (node.nodeType !== Node.ELEMENT_NODE || !node.firstChild) return;
-
-        if (!tableCells[node.nodeName]) {
-            for (var i = 0; i < node.childNodes.length; i++) {
-                processNode(node.childNodes[i]);
-            }
-
-            return;
-        }
-
-        node.insertBefore(openedNode.cloneNode(), node.firstChild);
-        node.appendChild(closedNode.cloneNode());
-    }
-}
-
-// Determine if tag node belongs to table nodes area, where we can create only temporary tags
-function isTmpTag(data) {
-    return !!tableContainers[data.node.parentElement.nodeName];
-}
-
-// After moving tags, mark them as tmp, if they are created inside no-tags table area. They would be deleted afterwords
-function saveTmpTags(opened, closed) {
-    if (isTmpTag(opened)) saveTmpTag('fromOpened', opened.node, null);
-    if (isTmpTag(closed)) saveTmpTag('fromClosed', null, closed.node);
-}
-
-// When extending tags, mark newly created tags as tmp, if they are created inside no-tags table area. They would be deleted afterwords
-function saveTmpTag(group, openedNode, closedNode) {
-    tmpTableTags[group].push({
-        opened: openedNode,
-        closed: closedNode
-    });
-}
-
-// When moving tag, we could have saved it as tmp tag, without paired tag. If extend is still needed, we unsave it to save again with its paired tag
-function unmarkTmpTagAfterMove(tmpGroup) {
-    if (tmpTableTags[tmpGroup].length) tmpTableTags[tmpGroup].pop();
-}
-
-
-/***/ }),
-/* 5 */
-/***/ (function(module, exports, __webpack_require__) {
-
-
-// Set dependencies
-var domConfig = __webpack_require__(0);
-var utils = __webpack_require__(2);
-var debug = __webpack_require__(1);
-
-// Module variables
 var updateTextNodeData = utils.updateTextNodeData;
 var createTextNode = utils.createTextNode;
 var startsWithTag = utils.startsWithTag;
 var endsWithTag = utils.endsWithTag;
 var Node = domConfig.Node;
 var log = debug.log;
-var fixTableTags = null;
-var saveTmpTag = null;
-var isTmpTag = null;
-var unmarkTmpTagAfterMove = null;
 
 module.exports = {
     init: init,
@@ -458,11 +331,6 @@ module.exports = {
 function init(config) {
     debug.init(config);
     utils.init(config);
-
-    fixTableTags = config.fixTableTags;
-    saveTmpTag = fixTableTags.saveTmpTag;
-    isTmpTag = fixTableTags.isTmpTag;
-    unmarkTmpTagAfterMove = fixTableTags.unmarkTmpTagAfterMove;
 }
 
 // Extend tag, if it's parts are in separate node trees
@@ -494,7 +362,6 @@ function extendSeparatedTagParts(opened, closed) {
 function extendTagForward(opened, closed, tillCommonAncestor) {
     log('-------------- extend tag forward');
 
-    var tmpGroup = 'fromOpened';
     var level = opened.level;
     var parent = opened.node;
     var newClosed = null;
@@ -504,14 +371,11 @@ function extendTagForward(opened, closed, tillCommonAncestor) {
         opened.node.parentElement.appendChild(newClosed);
     }
 
-    unmarkTmpTagAfterMove(tmpGroup);
-
     while (true) {
         level--;
         parent = parent.parentElement;
 
         if (!parent.nextSibling) continue;
-        if (isTmpTag(opened)) saveTmpTag(tmpGroup, opened.node, newClosed);
 
         updateTextNodeData(opened, level);
         parent.parentElement.insertBefore(opened.node, parent.nextSibling);
@@ -520,8 +384,6 @@ function extendTagForward(opened, closed, tillCommonAncestor) {
         newClosed = createTextNode(closed.tag);
         parent.parentElement.appendChild(newClosed);
     }
-
-    if (isTmpTag(opened)) saveTmpTag(tmpGroup, opened.node, null);
 }
 
 // Correctly surround by tag all data that's nested inside it, to avoid partial nodes removal.
@@ -530,7 +392,6 @@ function extendTagForward(opened, closed, tillCommonAncestor) {
 function extendTagBack(opened, closed, tillCommonAncestor) {
     log('-------------- extend tag back');
 
-    var tmpGroup = 'fromClosed';
     var level = closed.level;
     var parent = closed.node.parentElement;
     var newOpened = null;
@@ -540,7 +401,6 @@ function extendTagBack(opened, closed, tillCommonAncestor) {
         parent.insertBefore(newOpened, parent.firstChild);
     }
 
-    unmarkTmpTagAfterMove(tmpGroup);
     parent = closed.node;
 
     while (true) {
@@ -548,7 +408,6 @@ function extendTagBack(opened, closed, tillCommonAncestor) {
         parent = parent.parentElement;
 
         if (!parent.previousSibling) continue;
-        if (isTmpTag(closed)) saveTmpTag(tmpGroup, newOpened, closed.node);
 
         updateTextNodeData(closed, level);
         parent.parentElement.insertBefore(closed.node, parent);
@@ -557,8 +416,95 @@ function extendTagBack(opened, closed, tillCommonAncestor) {
         newOpened = createTextNode(opened.tag);
         parent.parentElement.insertBefore(newOpened, parent.parentElement.firstChild);
     }
+}
 
-    if (isTmpTag(closed)) saveTmpTag(tmpGroup, null, closed.node);
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+// Set dependencies
+var domConfig = __webpack_require__(0);
+var utils = __webpack_require__(2);
+var debug = __webpack_require__(1);
+
+// Module variables
+var startsWithTag = utils.startsWithTag;
+var endsWithTag = utils.endsWithTag;
+var repeatString = utils.repeatString;
+var createTextNode = utils.createTextNode;
+var Node = domConfig.Node;
+var log = debug.log;
+var tableContainers = {'TABLE': 1, 'THEAD': 1, 'TBODY': 1, 'TR': 1};
+var tableCells = {'TD': 1, 'TH': 1};
+
+module.exports = {
+    init: init,
+    run: run,
+    tableCells: tableCells
+};
+
+// Init module options
+function init(config) {
+    debug.init(config);
+    utils.init(config);
+}
+
+// Turn tmp tags, created in tables outside table cells, into correct tags inside cells
+function run(tag) {
+    // Section was removed or is not closed, or is correct
+    if (!tag.opened.node || !tag.closed || !isTmpTag(tag.opened)) return;
+    log('-- fix table tag: ', tag);
+
+    extendTmpTag(tag.opened, tag.closed);
+}
+
+// Extand tmp table tag to table cells, that are contained inside this tag
+function extendTmpTag(opened, closed) {
+    var next = opened.node;
+
+    while (true) {
+        next = next.nextSibling;
+        if (next === closed.node) break;
+
+        processNode(next);
+    }
+
+    startsWithTag(opened) && endsWithTag(opened) ?
+        opened.node.parentElement.removeChild(opened.node) :
+        cutNode(opened);
+
+    startsWithTag(closed) && endsWithTag(closed) ?
+        closed.node.parentElement.removeChild(closed.node) :
+        cutNode(closed);
+
+    function processNode(node) {
+        if (node.nodeType !== Node.ELEMENT_NODE || !node.firstChild) return;
+
+        if (!tableCells[node.nodeName]) {
+            for (var i = 0; i < node.childNodes.length; i++) {
+                processNode(node.childNodes[i]);
+            }
+
+            return;
+        }
+
+        node.insertBefore(createTextNode(opened.tag), node.firstChild);
+        node.appendChild(createTextNode(closed.tag));
+    }
+}
+
+// Determine if tag node belongs to table nodes area, where we can create only temporary tags
+function isTmpTag(data) {
+    return data.node.parentElement && !!tableContainers[data.node.parentElement.nodeName];
+}
+
+// Cut tag from it's containing text node, if this text node contains another tag text
+// Tag is replaced by whitespaces, to not mess with indexes of other possible tags in text
+function cutNode(data) {
+    var text = data.node.nodeValue;
+    data.node.nodeValue = text.substring(0, data.index) + repeatString(' ', data.tag.length) + text.substring(data.index + data.tag.length);
 }
 
 
@@ -571,7 +517,6 @@ function extendTagBack(opened, closed, tillCommonAncestor) {
 var domConfig = __webpack_require__(0);
 var utils = __webpack_require__(2);
 var debug = __webpack_require__(1);
-var fixTableTags = __webpack_require__(4);
 
 // Module variables
 var Node = domConfig.Node;
@@ -602,7 +547,7 @@ function init(config) {
     clearSpaces = [];
 }
 
-// Perform improve
+// Perform improve on already fixed tags: push out from containing nodes and merging same tags sections
 function run(improveTags) {
     tags = improveTags;
 
@@ -745,7 +690,6 @@ function canRise(tag) {
 
     return parent &&
         parent !== root &&
-        !fixTableTags.tableCells[parent.nodeName] &&
         parent.parentElement &&
         startsWithTag(opened) &&
         endsWithTag(closed) &&
@@ -783,7 +727,6 @@ var repeatString = utils.repeatString;
 var Node = domConfig.Node;
 var log = debug.log;
 var nodesWithPlaceholders = [];
-var fixTableTags = null;
 
 module.exports = {
     init: init,
@@ -799,7 +742,6 @@ function init(config) {
     utils.init(config);
 
     nodesWithPlaceholders = [];
-    fixTableTags = config.fixTableTags;
 }
 
 // Move tags in case when closing tag is in ancestor node of opening
@@ -821,8 +763,6 @@ function handleCaseClosedIsAncestor(opened, closed) {
         log('--------------- move closed tag down inside');
         moveTagDownBackword(closed, opened.level, opened.node);
     }
-
-    fixTableTags.saveTmpTags(opened, closed);
 }
 
 // Move tags in case when opening tag is in ancestor node of closing
@@ -844,8 +784,6 @@ function handleCaseOpenedIsAncestor(opened, closed) {
         log('--------------- move opened tag down inside');
         moveTagDownForward(opened, closed.level, closed.node);
     }
-
-    fixTableTags.saveTmpTags(opened, closed);
 }
 
 // Move tags in case when they are not in ancestor nodes of each other
@@ -872,8 +810,6 @@ function handleCaseSeparateTrees(opened, closed) {
         log('--------------- move closed tag up inside');
         moveTagUpBackword(closed, opened.level, opened.node);
     }
-
-    fixTableTags.saveTmpTags(opened, closed);
 }
 
 // Move tag down along nodes chain, that contain another part of tag, towards end of document
@@ -1098,10 +1034,10 @@ var map = {
 	"./dom-config.js": 0,
 	"./env": 3,
 	"./env.js": 3,
-	"./extend-tags": 5,
-	"./extend-tags.js": 5,
-	"./fix-table-tags": 4,
-	"./fix-table-tags.js": 4,
+	"./extend-tags": 4,
+	"./extend-tags.js": 4,
+	"./fix-table-tags": 5,
+	"./fix-table-tags.js": 5,
 	"./improve-tags": 6,
 	"./improve-tags.js": 6,
 	"./move-tags": 7,
@@ -1177,7 +1113,6 @@ function mustacheTidy(html, options) {
     var notClosed;
     var wrongClosed;
     var currentOpened;
-    var tmpTableTags;
 
     initDom();
     initVars('1:tidy');
@@ -1187,6 +1122,9 @@ function mustacheTidy(html, options) {
     initVars('2:improve');
     tidy();
     improveTags.run(improve);
+
+    initVars('3:fix-tables');
+    tidy();
 
     debug.hideInvalidTags(notClosed, wrongClosed);
     debug.logResult(root);
@@ -1204,7 +1142,6 @@ function mustacheTidy(html, options) {
         notClosed = {};
         wrongClosed = [];
         currentOpened = [];
-        tmpTableTags = {fromOpened: [], fromClosed: []};
 
         debug.init(options);
         utils.init(options);
@@ -1239,7 +1176,6 @@ function mustacheTidy(html, options) {
         options.doc = doc;
         options.root = root;
         options.regs = regs;
-        options.fixTableTags = fixTableTags;
     }
 
     // Launch processing given html source
@@ -1307,13 +1243,15 @@ function mustacheTidy(html, options) {
             node: node,
             index: match.index,
             level: level,
-            openedKey: currentOpened.length,
-            improveKey: improve.length
+            openedKey: currentOpened.length
         };
 
         // Register tag as opened
         if (typeof notClosed[name] === 'undefined') notClosed[name] = [];
-        if (step === '2:improve') improve.push({opened: data});
+        if (step === '2:improve') {
+            data.improveKey = improve.length;
+            improve.push({opened: data});
+        }
         notClosed[name].push(data);
         currentOpened.push(name);
 
@@ -1367,9 +1305,13 @@ function mustacheTidy(html, options) {
 
             log('closed: ', name);
 
-            step === '1:tidy' ?
-                tidyTag({opened: opened, closed: data}) :
+            if (step === '1:tidy') {
+                tidyTag({opened: opened, closed: data});
+            } else if (step === '2:improve') {
                 improve[opened.improveKey].closed = data;
+            } else if (step === '3:fix-tables') {
+                fixTableTags.run({opened: opened, closed: data});
+            }
         }
     }
 
@@ -1412,7 +1354,6 @@ function mustacheTidy(html, options) {
             }
         }
 
-        fixTableTags.handleTmpTags();
         moveTags.removePlaceholders();
         removeEmptyTag(opened, closed);
     }

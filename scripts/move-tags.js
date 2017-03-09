@@ -14,7 +14,6 @@ var repeatString = utils.repeatString;
 var Node = domConfig.Node;
 var log = debug.log;
 var nodesWithPlaceholders = [];
-var fixTableTags = null;
 
 module.exports = {
     init: init,
@@ -30,7 +29,6 @@ function init(config) {
     utils.init(config);
 
     nodesWithPlaceholders = [];
-    fixTableTags = config.fixTableTags;
 }
 
 // Move tags in case when closing tag is in ancestor node of opening
@@ -52,8 +50,6 @@ function handleCaseClosedIsAncestor(opened, closed) {
         log('--------------- move closed tag down inside');
         moveTagDownBackword(closed, opened.level, opened.node);
     }
-
-    fixTableTags.saveTmpTags(opened, closed);
 }
 
 // Move tags in case when opening tag is in ancestor node of closing
@@ -75,8 +71,6 @@ function handleCaseOpenedIsAncestor(opened, closed) {
         log('--------------- move opened tag down inside');
         moveTagDownForward(opened, closed.level, closed.node);
     }
-
-    fixTableTags.saveTmpTags(opened, closed);
 }
 
 // Move tags in case when they are not in ancestor nodes of each other
@@ -103,8 +97,6 @@ function handleCaseSeparateTrees(opened, closed) {
         log('--------------- move closed tag up inside');
         moveTagUpBackword(closed, opened.level, opened.node);
     }
-
-    fixTableTags.saveTmpTags(opened, closed);
 }
 
 // Move tag down along nodes chain, that contain another part of tag, towards end of document

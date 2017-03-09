@@ -3,7 +3,6 @@
 var domConfig = require('./dom-config');
 var utils = require('./utils');
 var debug = require('./debug');
-var fixTableTags = require('./fix-table-tags');
 
 // Module variables
 var Node = domConfig.Node;
@@ -177,7 +176,6 @@ function canRise(tag) {
 
     return parent &&
         parent !== root &&
-        !fixTableTags.tableCells[parent.nodeName] &&
         parent.parentElement &&
         startsWithTag(opened) &&
         endsWithTag(closed) &&

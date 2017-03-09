@@ -43,7 +43,6 @@ function mustacheTidy(html, options) {
     var notClosed;
     var wrongClosed;
     var currentOpened;
-    var tmpTableTags;
 
     initDom();
     initVars('1:tidy');
@@ -53,6 +52,9 @@ function mustacheTidy(html, options) {
     initVars('2:improve');
     tidy();
     improveTags.run(improve);
+
+    initVars('3:fix-tables');
+    tidy();
 
     debug.hideInvalidTags(notClosed, wrongClosed);
     debug.logResult(root);
@@ -70,7 +72,6 @@ function mustacheTidy(html, options) {
         notClosed = {};
         wrongClosed = [];
         currentOpened = [];
-        tmpTableTags = {fromOpened: [], fromClosed: []};
 
         debug.init(options);
         utils.init(options);
@@ -105,7 +106,6 @@ function mustacheTidy(html, options) {
         options.doc = doc;
         options.root = root;
         options.regs = regs;
-        options.fixTableTags = fixTableTags;
     }
 
     // Launch processing given html source
@@ -173,13 +173,15 @@ function mustacheTidy(html, options) {
             node: node,
             index: match.index,
             level: level,
-            openedKey: currentOpened.length,
-            improveKey: improve.length
+            openedKey: currentOpened.length
         };
 
         // Register tag as opened
         if (typeof notClosed[name] === 'undefined') notClosed[name] = [];
-        if (step === '2:improve') improve.push({opened: data});
+        if (step === '2:improve') {
+            data.improveKey = improve.length;
+            improve.push({opened: data});
+        }
         notClosed[name].push(data);
         currentOpened.push(name);
 
@@ -233,9 +235,13 @@ function mustacheTidy(html, options) {
 
             log('closed: ', name);
 
-            step === '1:tidy' ?
-                tidyTag({opened: opened, closed: data}) :
+            if (step === '1:tidy') {
+                tidyTag({opened: opened, closed: data});
+            } else if (step === '2:improve') {
                 improve[opened.improveKey].closed = data;
+            } else if (step === '3:fix-tables') {
+                fixTableTags.run({opened: opened, closed: data});
+            }
         }
     }
 
@@ -278,7 +284,6 @@ function mustacheTidy(html, options) {
             }
         }
 
-        fixTableTags.handleTmpTags();
         moveTags.removePlaceholders();
         removeEmptyTag(opened, closed);
     }
