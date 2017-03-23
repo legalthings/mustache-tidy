@@ -1,7 +1,7 @@
 {
   "name": "mustache-tidy",
+  "version": "0.1.0",
   "main": "index.js",
-  "private": true,
   "repository": {
     "type": "git",
     "url": "git@github.com:legalthings/mustache-tidy.git"
