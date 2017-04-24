@@ -44,4 +44,35 @@ describe('Basic html processing', function() {
         var result = tidy(input);
         expect(result).toBe('');
     });
+
+    it('should correctly handle &nbsp; tags', function() {
+        var input = `
+            <div>
+                {{ foo&nbsp; }}
+                <p>
+                    <span>Data</span>
+                    {{ &nbsp;#bar&nbsp; }}
+                    <span>Data</span>
+                </p>
+                <span>Data</span>
+                {{&nbsp;/bar&nbsp;}}
+            </div>
+        `;
+
+        var result = tidy(input);
+        expect(result).toBe(
+            '<div>' +
+                '{{ foo&nbsp; }}' +
+                '<p>' +
+                    '<span>Data</span>' +
+                    '{{ &nbsp;#bar&nbsp; }}' +
+                    '<span>Data</span>' +
+                    '{{&nbsp;/bar&nbsp;}}' +
+                '</p>' +
+                '{{ &nbsp;#bar&nbsp; }}' +
+                '<span>Data</span>' +
+                '{{&nbsp;/bar&nbsp;}}' +
+            '</div>'
+        );
+    });
 });
