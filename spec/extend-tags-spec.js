@@ -27,7 +27,7 @@ describe('Extending tags', function() {
                 '<div>' +
                     '<div>' +
                         '<div>' +
-                            'Data{{#tag}}Data' +
+                            ' Data{{#tag}}Data ' +
                             '{{/tag}}' +
                         '</div>' +
                         '{{#tag}}' +
@@ -43,7 +43,7 @@ describe('Extending tags', function() {
                 '{{#tag}}' +
                 '<span>Data</span>' +
                 '<span>Data</span>' +
-                '{{/tag}}' +
+                ' {{/tag}} ' +
             '</div>'
         );
     });
@@ -71,7 +71,7 @@ describe('Extending tags', function() {
         var result = tidy(input);
         expect(result).toBe(
             '<div>' +
-                '{{#tag}}' +
+                ' {{#tag}} ' +
                 '<span>Data</span>' +
                 '<span>Data</span>' +
                 '{{/tag}}' +
@@ -87,7 +87,7 @@ describe('Extending tags', function() {
                         '{{/tag}}' +
                         '<div>' +
                             '{{#tag}}' +
-                            'Data{{/tag}}Data' +
+                            ' Data{{/tag}}Data ' +
                         '</div>' +
                     '</div>' +
                 '</div>' +
@@ -131,7 +131,7 @@ describe('Extending tags', function() {
                 '<div>' +
                     '<div>' +
                         '<div>' +
-                            'Data{{#tag}}Data' +
+                            ' Data{{#tag}}Data ' +
                             '{{/tag}}' +
                         '</div>' +
                         '{{#tag}}' +
@@ -160,7 +160,7 @@ describe('Extending tags', function() {
                         '{{/tag}}' +
                         '<div>' +
                             '{{#tag}}' +
-                            'Data{{/tag}}Data' +
+                            ' Data{{/tag}}Data ' +
                         '</div>' +
                     '</div>' +
                 '</div>' +
@@ -202,7 +202,7 @@ describe('Extending tags', function() {
                 '<div>' +
                     '<div>' +
                         '<div>' +
-                            'Data{{#tag}}Data' +
+                            ' Data{{#tag}}Data ' +
                             '{{/tag}}' +
                         '</div>' +
                         '{{#tag}}' +
@@ -227,7 +227,7 @@ describe('Extending tags', function() {
                         '{{/tag}}' +
                         '<div>' +
                             '{{#tag}}' +
-                            'Data{{/tag}}Data' +
+                            ' Data{{/tag}}Data ' +
                         '</div>' +
                     '</div>' +
                 '</div>' +

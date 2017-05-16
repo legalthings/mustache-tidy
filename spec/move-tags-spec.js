@@ -23,7 +23,7 @@ describe('Moving tags', function() {
                     '</div>' +
                 '</div>' +
             '</div>' +
-            '{{/tag}}'
+            ' {{/tag}} '
         );
     });
 
@@ -41,7 +41,7 @@ describe('Moving tags', function() {
 
         var result = tidy(input);
         expect(result).toBe(
-            '{{#tag}}' +
+            ' {{#tag}} ' +
             '<div>' +
                 '<div>' +
                     '<div>' +
@@ -70,7 +70,7 @@ describe('Moving tags', function() {
         expect(result).toBe(
             '<div>' +
                 '<div>' +
-                    'Data{{#tag}}' +
+                    ' Data {{#tag}}' +
                     '<div>' +
                         '<p>Data</p>' +
                     '</div>' +
@@ -101,7 +101,7 @@ describe('Moving tags', function() {
                     '<div>' +
                         '<p>Data</p>' +
                     '</div>' +
-                    '{{/tag}}Data' +
+                    '{{/tag}} Data ' +
                 '</div>' +
             '</div>'
         );
@@ -168,7 +168,7 @@ describe('Moving tags', function() {
                     '</div>' +
                 '</div>' +
                 '{{#tag}}' +
-                'Data' +
+                ' Data ' +
                 '{{/tag}}' +
                 '<div>' +
                     '<div>' +

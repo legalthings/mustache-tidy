@@ -9,7 +9,7 @@ describe('Basic html processing', function() {
         `;
 
         var result = tidy(input);
-        expect(result).toBe('<div>Data</div>');
+        expect(result).toBe('<div> Data </div>');
     });
 
     it('should not handle single opening tag', function() {
@@ -20,7 +20,7 @@ describe('Basic html processing', function() {
         `;
 
         var result = tidy(input);
-        expect(result).toBe('<div>{{#tag}}</div>');
+        expect(result).toBe('<div> {{#tag}} </div>');
     });
 
     it('should not handle single closing tag', function() {
@@ -31,7 +31,7 @@ describe('Basic html processing', function() {
         `;
 
         var result = tidy(input);
-        expect(result).toBe('<div>{{/tag}}</div>');
+        expect(result).toBe('<div> {{/tag}} </div>');
     });
 
     it('should correctly handle input edge cases', function() {
@@ -89,16 +89,16 @@ describe('Basic html processing', function() {
         var result = tidy(input);
         expect(result).toBe(
             '<div>' +
-                '{{ foo&nbsp; }}' +
+                ' {{ foo&nbsp; }} ' +
                 '<p>' +
                     '<span>Data</span>' +
-                    '{{ &nbsp;#bar&nbsp; }}' +
+                    ' {{ &nbsp;#bar&nbsp; }} ' +
                     '<span>Data</span>' +
                     '{{&nbsp;/bar&nbsp;}}' +
                 '</p>' +
                 '{{ &nbsp;#bar&nbsp; }}' +
                 '<span>Data</span>' +
-                '{{&nbsp;/bar&nbsp;}}' +
+                ' {{&nbsp;/bar&nbsp;}} ' +
             '</div>'
         );
     });

@@ -24,7 +24,7 @@ describe('Improving tags', function() {
         var result = tidy(input);
         expect(result).toBe(
             '<div>' +
-                '{{^outer}}' +
+                ' {{^outer}} ' +
                 '{{#foo}}' +
                 '{{^bar}}' +
                 '{{#tag}}' +
@@ -38,8 +38,8 @@ describe('Improving tags', function() {
                 '{{/tag}}' +
                 '{{/}}' +
                 '{{/foo}}' +
-                '{{/}}' +
-                'Data' +
+                ' {{/}} ' +
+                ' Data ' +
             '</div>'
         );
     });
@@ -71,7 +71,7 @@ describe('Improving tags', function() {
                     '</div>' +
                 '</div>' +
                 '{{/tag}}' +
-                'Data' +
+                ' Data ' +
             '</div>'
         );
     });
@@ -140,7 +140,7 @@ describe('Improving tags', function() {
             '<div>' +
                 '<div>' +
                     '<div>' +
-                        '{{^tag}}Data 1{{/tag}}{{#tag}}Data 2{{/tag}}' +
+                        ' {{^tag}}Data 1{{/tag}}{{#tag}}Data 2{{/tag}} ' +
                     '</div>' +
                 '</div>' +
             '</div>'
@@ -163,7 +163,7 @@ describe('Improving tags', function() {
             '<div>' +
                 '<div>' +
                     '<div>' +
-                        '{{#tag}}Data 1{{/tag}}{{#foo}}Data 2{{/foo}}' +
+                        ' {{#tag}}Data 1{{/tag}}{{#foo}}Data 2{{/foo}} ' +
                     '</div>' +
                 '</div>' +
             '</div>'

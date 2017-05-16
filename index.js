@@ -19,6 +19,8 @@ var endsWithTag = utils.endsWithTag;
 var log = debug.log;
 var regs = {
     spaces: new RegExp('\\s+', 'g'),
+    startSpaces: new RegExp('^\\s* '),
+    endSpaces: new RegExp(' \\s*$'),
     tagName: new RegExp('(?:[^"\']+|"[^"]+"|\'[^\']+\')', 'g'),
     tag: new RegExp('\\{\\{\\s*([#^/])([^}]*)\\}\\}', 'g')
 };
@@ -132,7 +134,7 @@ function mustacheTidy(html, options) {
 
     // Perform tidy on single text DOM node
     function tidyTextNode(node, level) {
-        node.nodeValue = node.nodeValue.trim();
+        node.nodeValue = smartTrim(node.nodeValue);
 
         // Remove empty text nodes
         if (!node.nodeValue.length && node.parentElement) {
@@ -318,5 +320,19 @@ function mustacheTidy(html, options) {
             closed.node.nodeValue = closed.node.nodeValue.substring(closed.index + closed.tag.length);
 
         opened.node = closed.node = null;
+    }
+
+    // Trim text, leaving single start and ending spaces
+    function smartTrim(text) {
+        var hasStartSpace = !!regs.startSpaces.exec(text);
+        var hasEndSpace = !!regs.endSpaces.exec(text);
+
+        text = text.trim();
+        if (!text.length) return '';
+
+        if (hasStartSpace) text = ' ' + text;
+        if (hasEndSpace) text = text + ' ';
+
+        return text;
     }
 }
