@@ -1,6 +1,6 @@
 var tidy = require('../');
 
-describe('Extending tags', function() {
+describe('Fixing table tags', function() {
     it('should fix table tags, when opening tag is out of table, and closing is inside table', function() {
         var input = `
             {{^tag}}
@@ -37,7 +37,7 @@ describe('Extending tags', function() {
 
         var result = tidy(input);
         expect(result).toBe(
-            '{{^tag}}' +
+            '{{^tag}} ' +
             '<div>Data</div>' +
             '<div>Data</div>' +
             '{{/tag}}' +
@@ -141,7 +141,7 @@ describe('Extending tags', function() {
             '{{^tag}}' +
             '<div>Data</div>' +
             '<div>Data</div>' +
-            '{{/tag}}'
+            ' {{/tag}} '
         );
     });
 
@@ -191,7 +191,7 @@ describe('Extending tags', function() {
                         '<th>Data</th>' +
                         '<th>' +
                             '<span>' +
-                                'Data' +
+                                ' Data ' +
                                 '{{^tag}}' +
                                 '<em>Data</em>' +
                                 '{{/tag}}' +
