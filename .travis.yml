@@ -1,7 +1,6 @@
 language: node_js
 node_js:
 - 6.11.1
-- 8.1.4
 
 branches:
   only:
@@ -14,12 +13,12 @@ before_install:
 
 after_success:
 - npm install mversion -g
-- test "$TRAVIS_BRANCH" != 'master' -o "$TRAVIS_PULL_REQUEST" != "false" || test -n "$(git tag --contains)" || bin/bump-version
+- test "$TRAVIS_BRANCH" != 'master' -o "$TRAVIS_PULL_REQUEST" != "false" || test -n "$(git tag --contains)" || .bin/bump-version
 
 deploy:
   provider: npm
   email: sven.stam@gmail.com
   api_key:
-    secure: JvXPHHAVbvH4oE+pmCXSm/tV3qYqLJHcBK0dNI01bh+OHzSjFMgY7VNUjsJQhInsONTkYk5s0YbVTJH1pBJ739NGNqcUL88s9ytRliRFjJFQwX11xx/4C0UFBpd58vKwYhH2QS6JM6Rnen0bx5ptLhCIwpgNs+yGABfvae5i1HnnhXpnYj6GrpZrkjdrz6SgM1L8379tdLx8wfO3AY2+oV+WwLr3mQEvbjwaNMSFxAsQU9OQy8c4NQT+v/6wOqRMHEIUvAtLKB8RUJT4opvZxAapd6fpWxW6m6oWlD5ffc3yJWK6FYp5PmkPVpmm6yB7ihnx9TCgvdV9GFn/VrI3X282SprFz3Jo0x+THdyEjMO4zjB2YL7vlYcEj9T6ilPk40R+nWjCuY0k9fllfroGMNlaUth4limOsKDYywjpt5MP0IBuOBRKZdLKs/+HoKJRnZJgEmkZLtBU4HDQReXKKp/0D9hMFmgmX0rRJt7X8WEfD2TFJgcrIyRzePsulhEatiO330ZUXzDTILg/BvIMI8J55+4DhVqeRgK0gZiqZ8zbUww4MqP8xP2X9Ezb57L7Oh9S3mwQs7ygJEhFXn4Ot/gmRPuQjW+9GQzdFksjExY5d+3ocCda22dqzYPf7I4Sg/Bq4+JAAXgiQYb+UHB2HNLK9IbDyaX3HobOdJRXkV8=
+    secure: Skq2HUhXg0yOofS7G6XB1n7bcM+0R/hHO7t2t9CcmRE2g0tKPpQ8rrvnGyuH1q9+hMbfVJrMtqqYtgOBgMnjXdAFbfMmoCvIdwwFweqH5Mr7VzyUU13cRlGXF1GQmS8mkIYW2cw7rF6v72S+Pbv9NcEcmsllrxQe4LhupSMpIClABr9QLWQOhALzfqouhDwPwdjncCbDmPWmTu7dVOyp+ON7tFwf5qEfn0Z+It4w0Nb/H0aofoLsFbtE34lq0aoLtzkce0saGrhwK+WnXdSiAbOI/JLD32QCzY5d2CcOulOZYIdTf00NNfRUs8ANiKlnvC4OyLv7pbQHJeF77QszR/dvfngqYmh+kXy0On28rjKcORvodLq5GQsM7hLFiCeL/DLe85VG9dTRcnLbAak06njDROaN1Yy30Euj+DrPT394kbj90DtTeJF8sJfGu37jihvAttdybggR0K971Xfy0HIaJsJtEmtnCiQVwgBo9VyescFE/ZF91kneKa+GibwsIkon/q4CT1eftI2CqUBr+rv/xRiLpunOOj6g7wZLyaxw6YcNkDIk57khYsYPQ8FRnhs6aKYT4WoojQPLw9A89KC/BUm7VnZbmSBOdBdJuEKWGp1UUw3Z4PfWHvLQY5ZsyVwE5L7J+wz3p5ugJZ8IXLbkklOXBmil2H8LRZK/P94=
   on:
     branch: master
