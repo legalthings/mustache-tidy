@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/legalthings/mustache-tidy.svg?branch=master)](https://travis-ci.org/legalthings/mustache-tidy)
+
 # Mustache Tidy
 
 JavaScript library to clean up Mustache templates.
