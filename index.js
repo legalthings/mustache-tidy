@@ -17,10 +17,12 @@ var repeatString = utils.repeatString;
 var startsWithTag = utils.startsWithTag;
 var endsWithTag = utils.endsWithTag;
 var log = debug.log;
+
+//'startSpaces' and 'endSpaces' also match \u00a0, that is a representation of &nbsp; in textNode.nodeValue
 var regs = {
     spaces: new RegExp('\\s+', 'g'),
-    startSpaces: new RegExp('^\\s* '),
-    endSpaces: new RegExp(' \\s*$'),
+    startSpaces: new RegExp('^\\s+'),
+    endSpaces: new RegExp('\\s+$'),
     tagName: new RegExp('(?:[^"\']+|"[^"]+"|\'[^\']+\')', 'g'),
     tag: new RegExp('\\{\\{\\s*([#^/])([^}]*)\\}\\}', 'g')
 };
