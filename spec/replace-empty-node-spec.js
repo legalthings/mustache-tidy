@@ -349,4 +349,15 @@ describe('Replacing empty dom nodes with containing tags', function() {
         var result = tidy(input);
         expect(result).toBe('{{#tag}}<a href="#"></a> {{/tag}} ');
     });
+
+    it('should not remove end spaces', function() {
+        var input = `
+           <h1>Foo bar&nbsp;
+                <strong>next the title</strong>
+           &nbsp;{{ title }}</h1>    
+        `;
+
+        var result = tidy(input);
+        expect(result).toBe('<h1>Foo bar <strong>next the title</strong> {{ title }}</h1>');
+    })
 });
