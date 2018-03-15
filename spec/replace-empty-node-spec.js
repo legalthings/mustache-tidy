@@ -138,7 +138,7 @@ describe('Replacing empty dom nodes with containing tags', function() {
         `;
 
         var result = tidy(input);
-        expect(result).toBe('{{#tag}}<div>Data</div>{{/tag}}');
+        expect(result).toBe('{{#tag}}<div> Data </div>{{/tag}}');
     });
 
     it('should recursively replace both tags nodes and root nodes, and then remove tags as empty', function() {
@@ -315,7 +315,7 @@ describe('Replacing empty dom nodes with containing tags', function() {
         `;
 
         var result = tidy(input);
-        expect(result).toBe('{{#tag}}<div>Data</div>{{/}}');
+        expect(result).toBe('{{#tag}}<div> Data </div>{{/}}');
     });
 
     it('should not replace empty nodes, that do not contain tags', function() {
@@ -354,7 +354,7 @@ describe('Replacing empty dom nodes with containing tags', function() {
         var input = `
            <h1>Foo bar&nbsp;
                 <strong>next the title</strong>
-           &nbsp;{{ title }}</h1>    
+           &nbsp;{{ title }}</h1>
         `;
 
         var result = tidy(input);

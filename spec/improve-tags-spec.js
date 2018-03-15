@@ -31,7 +31,7 @@ describe('Improving tags', function() {
                 '<div>' +
                     '<div>' +
                         '<div>' +
-                            'Data' +
+                            ' Data ' +
                         '</div>' +
                     '</div>' +
                 '</div>' +
@@ -66,7 +66,7 @@ describe('Improving tags', function() {
                 '<div>' +
                     '<div>' +
                         '<div>' +
-                            'Data 1 Data 2' +
+                            ' Data 1 Data 2 ' +
                         '</div>' +
                     '</div>' +
                 '</div>' +
@@ -89,7 +89,7 @@ describe('Improving tags', function() {
         `;
 
         var result = tidy(input);
-        expect(result).toBe('{{#tag}}<div><div><div>Data 1 Data 2</div></div></div>{{/}}');
+        expect(result).toBe('{{#tag}}<div><div><div> Data 1 Data 2 </div></div></div>{{/}}');
     });
 
     it('should merge all same tags while recursively rising tag up from parent nodes', function() {
@@ -112,11 +112,11 @@ describe('Improving tags', function() {
         expect(result).toBe(
             '{{#tag}}' +
             '<div>' +
-                'Data 1 Data 2' +
+                ' Data 1 Data 2 ' +
                 '<div>' +
-                    'Data 1 Data 2' +
+                    ' Data 1 Data 2 ' +
                     '<div>' +
-                        'Data 1 Data 2' +
+                        ' Data 1 Data 2 ' +
                     '</div>' +
                 '</div>' +
             '</div>' +
@@ -199,7 +199,7 @@ describe('Improving tags', function() {
         var result = tidy(input);
         expect(result).toBe(
             '{{^outer}}' +
-            '{{#tag}}' +
+            ' {{#tag}} ' +
             '<div>' +
                 '<span>Data</span>' +
                 '<div>' +
@@ -216,7 +216,7 @@ describe('Improving tags', function() {
                 '</div>' +
                 '<span>Data</span>' +
             '</div>' +
-            '{{/tag}}' +
+            ' {{/tag}} ' +
             '{{/outer}}'
         );
     });

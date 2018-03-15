@@ -60,7 +60,14 @@ function run(improveTags) {
     for (var i = 0; i < clearSpaces.length; i++) {
         if (!clearSpaces[i]) continue;
 
-        clearSpaces[i].nodeValue = clearSpaces[i].nodeValue.replace(spacesReg, ' ').trim();
+        var node = clearSpaces[i];
+        var text = node.nodeValue;
+
+        text = text.replace(spacesReg, ' ').trim();
+        if (node.startsWithSpace) text = ' ' + text;
+        if (node.endsWithSpace) text = text + ' ';
+
+        node.nodeValue = text;
     }
 }
 
@@ -184,10 +191,21 @@ function canRise(tag) {
 }
 
 // Cut tag from it's containing text node, if this text node contains another text
-// Tag is replaced by whitespaces, to not mess with indexes of other possible tags in text
+// Tag is replaced by spaces, to not mess with indexes of other possible tags in text
 function cutNode(data, remove) {
-    var text = data.node.nodeValue;
-    data.node.nodeValue = text.substring(0, data.index) + repeatString(' ', data.tag.length) + text.substring(data.index + data.tag.length);
+    var node = data.node;
+    var text = node.nodeValue;
+
+    if (typeof node.startsWithSpace === 'undefined') {
+        node.startsWithSpace = !text.substring(0, 1).trim().length;
+    }
+
+    if (typeof node.endsWithSpace === 'undefined') {
+        node.endsWithSpace = !text.substr(-1).trim().length;
+    }
+
+    node.nodeValue = text.substring(0, data.index) + repeatString(' ', data.tag.length) + text.substring(data.index + data.tag.length);
     clearSpaces.push(data.node);
+
     if (!remove) updateTextNodeData(data);
 }
